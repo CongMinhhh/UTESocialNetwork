@@ -43,10 +43,10 @@
 
                     </div>
                     <div class="right-side lg:pr-4">
-                         <!-- Forgotten things -->
+                         <!-- Market Place -->
                          <a href="ForgottenPage.html"
                          class="bg-blue-600 flex font-bold hidden hover:bg-blue-600 hover:text-white inline-block items-center lg:block max-h-10 mr-4 px-4 py-2 rounded shado text-white">
-                            <ion-icon name="add-circle" class="-mb-1 mr-1 opacity-90 text-xl uilus-circle"></ion-icon>Đồ bỏ quên</a>
+                            <ion-icon name="add-circle" class="-mb-1 mr-1 opacity-90 text-xl uilus-circle"></ion-icon>CHỢ SINH VIÊN</a>
                         
                          <!-- Notification -->
 
@@ -123,45 +123,46 @@
                     <div class="space-y-5 flex-shrink-0 lg:w-8/12 mr-4">
                         
                         <!-- upload post-->
-                        <div class="bg-white shadow rounded-md p-4 mb-5">
-                            <!-- Header: Avatar + Input -->
-                            <div class="flex space-x-4 items-start overflow-hidden">
-                                <!-- Avatar -->
-                                <img src="{% static 'assets/images/avatars/avatar_3.jpg' %}" alt="Avatar"
-                                    class="w-10 h-10 rounded-full object-cover">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="bg-white shadow rounded-md p-4 mb-5">
+                                <!-- Header: Avatar + Input -->
+                                <div class="flex space-x-4 items-start overflow-hidden">
+                                    <!-- Avatar -->
+                                    <img src="{% static 'assets/images/avatars/avatar_3.jpg' %}" alt="Avatar"
+                                        class="w-10 h-10 rounded-full object-cover">
                         
-                                <!-- Input post content -->
-                                <textarea placeholder="Bạn đang nghĩ gì?" rows="3"
-                                    class="w-full border-none resize-none focus:ring-0 focus:outline-none text-gray-700 bg-gray-100 rounded-md p-3"></textarea>
-                            </div>
-                        
-                            <!-- Attachment buttons -->
-                            <div class="flex justify-between items-center mt-4 px-2">
-                                <div class="flex space-x-3 text-sm text-blue-500 font-semibold">
-                                    <label class="flex items-center cursor-pointer space-x-1 hover:text-blue-600">
-                                        <i class="uil-image text-xl"></i>
-                                        <span>Ảnh</span>
-                                        <input type="file" accept="image/*" class="hidden">
-                                    </label>
-                        
-                                    <label class="flex items-center cursor-pointer space-x-1 hover:text-blue-600">
-                                        <i class="uil-video text-xl"></i>
-                                        <span>Video</span>
-                                        <input type="file" accept="video/*" class="hidden">
-                                    </label>
-                        
-                                    <label class="flex items-center cursor-pointer space-x-1 hover:text-blue-600">
-                                        <i class="uil-file text-xl"></i>
-                                        <span>Tài liệu</span>
-                                        <input type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" class="hidden">
-                                    </label>
+                                    <!-- Input post content -->
+                                    <textarea name="content" placeholder="Bạn đang nghĩ gì?" rows="3"
+                                        class="w-full border-none resize-none focus:ring-0 focus:outline-none text-gray-700 bg-gray-100 rounded-md p-3"></textarea>
                                 </div>
                         
-                                <!-- Nút đăng bài -->
-                                <button
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md text-sm font-semibold">Đăng bài</button>
+                                <!-- Attachment buttons -->
+                                <div class="flex justify-between items-center mt-4 px-2">
+                                    <div class="flex space-x-3 text-sm text-blue-500 font-semibold">
+                                        <label class="flex items-center cursor-pointer space-x-1 hover:text-blue-600">
+                                            <i class="uil-image text-xl"></i>
+                                            <span>Ảnh</span>
+                                            <input type="file" name="image" accept="image/*" class="hidden">
+                                        </label>
+                                    </div>
+                        
+                                    <!-- Nút đăng bài -->
+                                    <button type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-md text-sm font-semibold">Đăng bài</button>
+                                </div>
                             </div>
+                        </form>
+
+
+                        {% for bai_viet in bai_viets %}
+                        <div class="post">
+                            <p>{{ bai_viet.noi_dung }}</p>
+                            {% if bai_viet.hinh_anh %}
+                                <img src="{{ bai_viet.hinh_anh.url }}" alt="Hình ảnh bài viết">
+                            {% endif %}
                         </div>
+                        {% endfor %}
                         
                         
     
