@@ -5,7 +5,7 @@ from datetime import datetime
 
 User = get_user_model()
 
-# Create your models here.
+
 class Profile(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_user = models.IntegerField()
@@ -19,7 +19,7 @@ class Profile(models.Model):
 class Post(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.CharField(max_length=100)
-    image = models.ImageField(upload_to='post_images')
+    image = models.ImageField(upload_to='post_images', blank=True, null=True)
     caption = models.TextField()
     created_at = models.DateTimeField(default=datetime.now)
     no_of_likes = models.IntegerField(default=0)
@@ -40,3 +40,79 @@ class FollowersCount(models.Model):
 
     def __str__(self):
         return self.user
+    
+
+class Group(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    admin = models.ForeignKey(User, on_delete=models.CASCADE, related_name='admin_groups')
+    is_private = models.BooleanField(default=False)
+    profile_image = models.ImageField(upload_to='group_profile_images', default='blank-group-picture.png')
+
+    def __str__(self):
+        return self.name
+
+
+class GroupMember(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='members')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='group_memberships')
+    joined_at = models.DateTimeField(auto_now_add=True)
+    is_admin = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('group', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} in {self.group.name}"
+
+class GroupPost(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='posts')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='group_post_images', blank=True, null=True)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(User, related_name='group_post_likes', blank=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s post in {self.group.name}"
+
+class GroupComment(models.Model):
+    post = models.ForeignKey(GroupPost, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username}'s comment on {self.post.id}"
+
+class GroupJoinRequest(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='join_requests')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected')
+    ], default='pending')
+
+    class Meta:
+        unique_together = ('group', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.group.name}"
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Message from {self.sender.username} to {self.receiver.username}'

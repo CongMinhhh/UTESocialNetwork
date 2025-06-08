@@ -260,52 +260,105 @@
                     <div class="col-md-3 col-md-push-9">
                         <h4>Kết quả tìm kiếm cho <span class="fw-semi-bold"><b>{{username}}</b></span></h4>
                         <br>
-                        
+                        <div class="mb-4">
+                            <h5 class="font-semibold mb-2">Lọc kết quả:</h5>
+                            <div class="flex flex-col space-y-2">
+                                <button class="text-left px-3 py-2 rounded hover:bg-gray-100" onclick="showResults('users')">
+                                    Người dùng
+                                </button>
+                                <button class="text-left px-3 py-2 rounded hover:bg-gray-100" onclick="showResults('groups')">
+                                    Nhóm
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="col-md-9 col-md-pull-3">
-                        <!-- <p class="search-results-count">About 94 700 000 (0.39 sec.) results</p> -->
-                        
-                        {% for users in username_profile_list %}
-                        <section class="search-result-item">
-                            <a class="image-link" href="/profile/{{users.user}}"><img class="image" src="{{users.profileimg.url}}">
-                            </a>
-                            <div class="search-result-item-body">
-                                <div class="row">
-                                    <div class="col-sm-9">
-                                        <h4 class="search-result-item-heading"><a href="/profile/{{users.user}}"><b>@{{users.user}}</b></a></h4>
-                                        <p class="info">{{users.location}}</p>
-                                        <p class="description">{{users.bio}}</p>
+                        <!-- User Results -->
+                        <div id="user-results">
+                            <h5 class="mb-4">Người dùng</h5>
+                            {% for users in username_profile_list %}
+                            <section class="search-result-item">
+                                <a class="image-link" href="/profile/{{users.user}}">
+                                    <img class="image" src="{{users.profileimg.url}}">
+                                </a>
+                                <div class="search-result-item-body">
+                                    <div class="row">
+                                        <div class="col-sm-9">
+                                            <h4 class="search-result-item-heading">
+                                                <a href="/profile/{{users.user}}"><b>@{{users.user}}</b></a>
+                                            </h4>
+                                            <p class="info">{{users.location}}</p>
+                                            <p class="description">{{users.bio}}</p>
+                                        </div>
                                     </div>
-                                    <!-- <div class="col-sm-3 text-align-center">
-                                        <p class="value3 mt-sm">$9, 700</p>
-                                        <p class="fs-mini text-muted">PER WEEK</p><a class="btn btn-primary btn-info btn-sm" href="#">Learn More</a>
-                                    </div> -->
                                 </div>
-                            </div>
-                        </section>
-                        {% endfor %}
-                        
-                        <!-- <div class="text-align-center">
-                            <ul class="pagination pagination-sm">
-                                <li class="disabled"><a href="#">Prev</a>
-                                </li>
-                                <li class="active"><a href="#">1</a>
-                                </li>
-                                <li><a href="#">2</a>
-                                </li>
-                                <li><a href="#">3</a>
-                                </li>
-                                <li><a href="#">4</a>
-                                </li>
-                                <li><a href="#">5</a>
-                                </li>
-                                <li><a href="#">Next</a>
-                                </li>
-                            </ul>
-                        </div> -->
+                            </section>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Group Results -->
+                        <div id="group-results" style="display: none;">
+                            <h5 class="mb-4">Nhóm</h5>
+                            {% for group in groups %}
+                            <section class="search-result-item">
+                                <a class="image-link" href="{% url 'group_detail' group.id %}">
+                                    <img class="image" src="{{ group.profile_image.url }}" alt="{{ group.name }}">
+                                </a>
+                                <div class="search-result-item-body">
+                                    <div class="row">
+                                        <div class="col-sm-9">
+                                            <h4 class="search-result-item-heading">
+                                                <a href="{% url 'group_detail' group.id %}"><b>{{ group.name }}</b></a>
+                                            </h4>
+                                            <p class="info">{{ group.members.count }} thành viên</p>
+                                            <p class="description">{{ group.description }}</p>
+                                        </div>
+                                        <div class="col-sm-3">
+                                            {% if not group in user_groups %}
+                                            <button onclick="joinGroup('{{ group.id }}')" 
+                                                class="btn btn-primary btn-sm mt-2">
+                                                Tham gia nhóm
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            {% endfor %}
+                        </div>
                     </div>
                 </div>
                 </div>
+
+                <script>
+                function showResults(type) {
+                    if (type === 'users') {
+                        document.getElementById('user-results').style.display = 'block';
+                        document.getElementById('group-results').style.display = 'none';
+                    } else {
+                        document.getElementById('user-results').style.display = 'none';
+                        document.getElementById('group-results').style.display = 'block';
+                    }
+                }
+
+                function joinGroup(groupId) {
+                    fetch(`/group/${groupId}/join/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    });
+                }
+                </script>
             </div>
 
         </div>

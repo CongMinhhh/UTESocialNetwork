@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, group_views
 
 urlpatterns = [
     path('', views.index, name='index'),
@@ -12,4 +12,19 @@ urlpatterns = [
     path('signup', views.signup, name='signup'),
     path('signin', views.signin, name='signin'),
     path('logout', views.logout, name='logout'),
+    path('group/create/', group_views.create_group, name='create_group'),
+    path('group/<uuid:group_id>/', group_views.group_detail, name='group_detail'),
+    path('group/<uuid:group_id>/join/', group_views.join_group, name='join_group'),
+    path('group/<uuid:group_id>/post/', group_views.create_group_post, name='create_group_post'),
+    path('group/<uuid:group_id>/requests/', group_views.manage_group_requests, name='manage_group_requests'),
+    path('group/request/<int:request_id>/handle/', group_views.handle_join_request, name='handle_join_request'),
+    path('group/<uuid:group_id>/settings/', group_views.group_settings, name='group_settings'),
+    path('group/<uuid:group_id>/update/', group_views.update_group, name='update_group'),
+    path('group/<uuid:group_id>/member/<int:user_id>/remove/', group_views.remove_member, name='remove_member'),
+    path('group/<uuid:group_id>/member/<int:user_id>/toggle-admin/', group_views.toggle_admin, name='toggle_admin'),
+    path('group/post/<uuid:post_id>/like/', group_views.like_post, name='like_group_post'),
+    path('group/post/<uuid:post_id>/comment/', group_views.add_comment, name='add_comment'),
+    path('messages/', views.messages_page, name='messages'),
+    path('send-message/', views.send_message, name='send_message'),
+    path('get-messages/<int:user_id>/', views.get_messages, name='get_messages'),
 ]

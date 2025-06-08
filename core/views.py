@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, auth
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost, FollowersCount
+from .models import Profile, Post, LikePost, FollowersCount, Group, Message
 from itertools import chain
 import random
+from django.db import models
+from django.db.models import Q
 
 # Create your views here.
 
@@ -27,6 +29,13 @@ def index(request):
         feed.append(feed_lists)
 
     feed_list = list(chain(*feed))
+
+    # Thêm bài viết của người dùng hiện tại vào feed
+    user_posts = Post.objects.filter(user=request.user.username)
+    feed_list.extend(user_posts)
+
+    # Sắp xếp lại theo thời gian tạo
+    feed_list.sort(key=lambda x: x.created_at, reverse=True)
 
     # user suggestion starts
     all_users = User.objects.all()
@@ -53,8 +62,11 @@ def index(request):
 
     suggestions_username_profile_list = list(chain(*username_profile_list))
 
-
-    return render(request, 'MainPage.html', {'user_profile': user_profile, 'posts':feed_list, 'suggestions_username_profile_list': suggestions_username_profile_list[:4]})
+    return render(request, 'MainPage.html', {
+        'user_profile': user_profile, 
+        'posts': feed_list, 
+        'suggestions_username_profile_list': suggestions_username_profile_list[:4]
+    })
 
 @login_required(login_url='signin')
 def upload(request):
@@ -89,9 +101,27 @@ def search(request):
         for ids in username_profile:
             profile_lists = Profile.objects.filter(id_user=ids)
             username_profile_list.append(profile_lists)
+
+        # Tìm kiếm nhóm
+        groups = Group.objects.filter(
+            models.Q(name__icontains=username) | 
+            models.Q(description__icontains=username)
+        )
         
-        username_profile_list = list(chain(*username_profile_list))
-    return render(request, 'SearchPage.html', {'user_profile': user_profile, 'username_profile_list': username_profile_list})
+        # Lấy danh sách nhóm người dùng đã tham gia
+        user_groups = Group.objects.filter(members__user=request.user)
+
+        context = {
+            'user_profile': user_profile,
+            'username_profile_list': username_profile_list[0] if username_profile_list else [],
+            'username': username,
+            'groups': groups,
+            'user_groups': user_groups,
+        }
+
+        return render(request, 'SearchPage.html', context)
+    
+    return render(request, 'SearchPage.html', {'user_profile': user_profile})
 
 @login_required(login_url='signin')
 def like_post(request):
@@ -245,3 +275,91 @@ def signin(request):
 def logout(request):
     auth.logout(request)
     return redirect('signin')
+
+@login_required(login_url='signin')
+def messages_page(request):
+    # Get all conversations of the current user
+    conversations = Message.objects.filter(
+        Q(sender=request.user) | Q(receiver=request.user)
+    ).values('sender', 'receiver').distinct()
+    
+    # Get unique users that the current user has conversations with
+    users_with_conversations = set()
+    for conv in conversations:
+        if conv['sender'] == request.user.id:
+            users_with_conversations.add(conv['receiver'])
+        else:
+            users_with_conversations.add(conv['sender'])
+    
+    chat_users = User.objects.filter(id__in=users_with_conversations)
+    
+    # If a specific chat is selected
+    selected_user_id = request.GET.get('user_id')
+    if selected_user_id:
+        selected_user = User.objects.get(id=selected_user_id)
+        messages = Message.objects.filter(
+            (Q(sender=request.user) & Q(receiver=selected_user)) |
+            (Q(sender=selected_user) & Q(receiver=request.user))
+        ).order_by('created_at')
+        
+        # Mark messages as read
+        unread_messages = messages.filter(receiver=request.user, is_read=False)
+        unread_messages.update(is_read=True)
+    else:
+        selected_user = None
+        messages = []
+    
+    context = {
+        'chat_users': chat_users,
+        'selected_user': selected_user,
+        'messages': messages,
+    }
+    
+    return render(request, 'MessagePage.html', context)
+
+@login_required(login_url='signin')
+def send_message(request):
+    if request.method == 'POST':
+        receiver_id = request.POST.get('receiver_id')
+        content = request.POST.get('content')
+        
+        if receiver_id and content:
+            try:
+                receiver = User.objects.get(id=receiver_id)
+                message = Message.objects.create(
+                    sender=request.user,
+                    receiver=receiver,
+                    content=content
+                )
+                return JsonResponse({
+                    'status': 'success',
+                    'message': {
+                        'content': message.content,
+                        'created_at': message.created_at.strftime('%H:%M'),
+                        'sender_username': message.sender.username,
+                    }
+                })
+            except User.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'User not found'})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+@login_required(login_url='signin')
+def get_messages(request, user_id):
+    try:
+        other_user = User.objects.get(id=user_id)
+        messages = Message.objects.filter(
+            (Q(sender=request.user) & Q(receiver=other_user)) |
+            (Q(sender=other_user) & Q(receiver=request.user))
+        ).order_by('created_at')
+        
+        messages_data = [{
+            'content': msg.content,
+            'sender_id': msg.sender.id,
+            'created_at': msg.created_at.strftime('%H:%M'),
+            'is_read': msg.is_read,
+        } for msg in messages]
+        
+        return JsonResponse({'status': 'success', 'messages': messages_data})
+    except User.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'User not found'})

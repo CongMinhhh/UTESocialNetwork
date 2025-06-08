@@ -56,6 +56,9 @@
 					<a href="/settings" data-ripple="">Quản lý tài khoản</a>
 					{% else %}
 					<a data-ripple=""><button type="submit" style="background-color: #ffc0cb; border: #ffc0cb;">{{button_text}}</button></a>
+					<a href="/messages/?user_id={{user_object.id}}" class="ml-2" style="background-color: #4CAF50; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none;">
+						<i class="fa fa-envelope"></i> Nhắn tin
+					</a>
 					{% endif %}
 
 					</div>
@@ -66,7 +69,11 @@
 						<div class="col-lg-2 col-sm-3">
 							<div class="user-avatar">
 								<figure>
-									<img src="{{user_profile.profileimg.url}}" style="height: 250px; width: 100%;" alt="">
+									{% if user_profile.profileimg %}
+										<img src="{{user_profile.profileimg.url}}" style="height: 250px; width: 100%;" alt="">
+									{% else %}
+										<img src="/media/profile_images/blank-profile-picture.png" style="height: 250px; width: 100%;" alt="Default Profile Picture">
+									{% endif %}
 									<!-- <form class="edit-phto">
 										<i class="fa fa-camera-retro"></i>
 										<label class="fileContainer">
@@ -83,22 +90,6 @@
 									  <h5 style="color: black;white-space: nowrap; width: 110px; font-size: 27px;"><b>@{{user_profile.user.username}}</b><!--<i class="fa fa-check-circle" style="color: #48dbfb;" aria-hidden="true"></i>--></h5>
 									  <!--<span>Group Admin</span>-->
 									</li>
-									<!--<li>
-										<a class="" href="javascript:void(0)" title="" data-ripple="">Go live!</a>
-										<a class="" href="javascript:void(0)" title="" data-ripple="">Music</a>
-										<a class="" href="emporium/index-3.html" title="" data-ripple="">Emporium</a>
-										<a class="" href="fitness/index.html" title="" data-ripple="">Health Inspection</a>
-										<a class="" href="settings/account-setting.html" title="" data-ripple="">Settings</a>
-										<a class="" href="javascript:void(0)" title="" data-ripple="">Upload</a>
-										<a class="" href="time-line.html" title="" data-ripple="">time line</a>
-										<a class="" href="timeline-photos.html" title="" data-ripple="">Photos</a>
-										<a class="" href="timeline-videos.html" title="" data-ripple="">Videos</a>
-										<a class="" href="timeline-friends.html" title="" data-ripple="">Friends</a>
-										<a class="" href="timeline-groups.html" title="" data-ripple="">Groups</a>
-										<a class="" href="about.html" title="" data-ripple="">about</a>
-										<a class="" href="#" title="" data-ripple="">more</a>
-
-									</li>-->
 								</ul>
 							</div>
 						</div>
@@ -141,8 +132,28 @@
 					
 										{% for post in user_posts %}
 										<li>
-											<a class="strip" href="{{post.image.url}}" title="" data-strip-group="mygroup" data-strip-group-options="loop: false">
-												<img src="{{post.image.url}}" style="height: 250px; width: 300px;" alt=""></a>
+											{% if post.image %}
+												<a class="strip" href="{{post.image.url}}" title="" data-strip-group="mygroup" data-strip-group-options="loop: false">
+													<img src="{{post.image.url}}" style="height: 250px; width: 300px;" alt="">
+												</a>
+											{% else %}
+												<div class="post-content" style="padding: 15px; background: #f8f9fa; margin-bottom: 15px; border-radius: 8px;">
+													<div class="post-header">
+														{% if post.user.profile.profileimg %}
+															<img src="{{ post.user.profile.profileimg.url }}" alt="user" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+														{% else %}
+															<img src="/media/profile_images/blank-profile-picture.png" alt="Default Profile" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+														{% endif %}
+														<span style="font-weight: bold;">{{ post.user.username }}</span>
+													</div>
+													<div class="post-text" style="margin-top: 10px;">
+														{{ post.caption }}
+													</div>
+													<div class="post-footer" style="margin-top: 10px; color: #666;">
+														<span>{{ post.created_at|date:"d/m/Y H:i" }}</span>
+													</div>
+												</div>
+											{% endif %}
 										</li>
 										{% endfor %}
 										

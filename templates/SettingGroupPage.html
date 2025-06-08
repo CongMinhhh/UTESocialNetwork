@@ -6,226 +6,151 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{% static 'assets/images/favicon.png' %}" rel="icon" type="image/png">
-    <title>Chỉnh sửa thông tin cá nhân</title>
+    <title>Cài đặt nhóm - {{ group.name }}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
-
 </head>
-<header>
-    <div class="header_inner">
-        <div class="left-side">
-            <!-- Logo -->
-            <div id="logo" style="margin-right: 10px;">
-                <a href="MainPage.html">
-                    <b style="font-weight: bold;"><h1>UTE Social Network</h1></b>
-                </a>
-            </div>
-            
-
-        </div>
-        <div class="right-side lg:pr-4">
-             <!-- Forgotten things -->
-             <a href="ForgottenPage.html"
-             class="bg-blue-600 flex font-bold hidden hover:bg-blue-600 hover:text-white inline-block items-center lg:block max-h-10 mr-4 px-4 py-2 rounded shado text-white">
-                <ion-icon name="add-circle" class="-mb-1 mr-1 opacity-90 text-xl uilus-circle"></ion-icon>Đồ bỏ quên</a>
-            
-             <!-- Notification -->
-
-            <a href="#" class="header-links-item">
-                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><g fill="none"><path d="M12 22a2.02 2.02 0 0 1-2.01-2h4a2.02 2.02 0 0 1-.15.78a2.042 2.042 0 0 1-1.44 1.18h-.047A1.922 1.922 0 0 1 12 22zm8-3H4v-2l2-1v-5.5a8.065 8.065 0 0 1 .924-4.06A4.654 4.654 0 0 1 10 4.18V2h4v2.18c2.579.614 4 2.858 4 6.32V16l2 1v2z" fill="currentColor"/></g></svg>
-            </a>
-            <div uk-drop="mode: click;offset: 4" class="header_dropdown">
-                <h4
-                    class="-mt-5 -mx-5 bg-gradient-to-t from-gray-100 to-gray-50 border-b font-bold px-6 py-3">
-                    Thông báo </h4>
-                <ul class="dropdown_scrollbar" data-simplebar>
-                    <li>
-                        <a href="#">
-                            <div class="drop_avatar"> <img src="{% static 'assets/images/avatars/avatar_1.jpg' %}" alt="">
-                            </div>
-                            <div class="drop_content">
-                                <p> <strong class="text-link" >Công Minh</strong>  
-                                    <span class="text-link"> Gửi lời mời kết bạn </span>
-                                </p>
-                                <span class="time-ago"> 2 tiếng trước </span>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-                <a href="#" class="see-all">Xem toàn bộ</a>
-            </div>
-
-            <!-- Messages -->
-
-            <a href="#" class="header-links-item">
-                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" width="0.5em" height="0.5em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 16 16"><g fill="currentColor"><path d="M2 0a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5a1 1 0 0 1 .8.4l1.9 2.533a1 1 0 0 0 1.6 0l1.9-2.533a1 1 0 0 1 .8-.4H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/></g></svg>
-            </a>
-            <div uk-drop="mode: click;offset: 4" class="header_dropdown">
-                <h4
-                    class="-mt-5 -mx-5 bg-gradient-to-t from-gray-100 to-gray-50 border-b font-bold px-6 py-3">
-                    Tin nhắn </h4>
-                <ul class="dropdown_scrollbar" data-simplebar>
-                    <li>
-                        <a href="#">
-                            <div class="drop_avatar"> <img src="{% static 'assets/images/avatars/avatar_1.jpg' %}" alt="">
-                            </div>
-                            <div class="drop_content">
-                                <strong> Công Minh </strong> <time> 8:20 AM</time>
-                                <p>Hello</p>
-                            </div>
-                        </a>
-                    </li>
-                    
-
-
-                </ul>
-                <a href="#" class="see-all">Xem tất cả</a>
-            </div>
-
-            <!-- profile -->
-
-            <a href="#">
-                <img src="{% static 'assets/images/avatars/avatar_3.JPG' %}" class="header-avatar" alt="">
-            </a>
-            <div uk-drop="mode: click;offset:9" class="header_dropdown profile_dropdown border-t">
-                <ul>
-                    <li><a href="SettingPage.html"> Cài đặt tài khoản </a> </li>
-                    <li><a href="SignInPage.html"> Đăng xuất</a></li>
-                </ul>
-            </div>
-
-        </div>
-    </div>
-</header>
 
 <body>
-            <div class="container m-auto"> 
+    {% include 'partials/_header.html' %}
 
-
-                <div class="grid lg:grid-cols-3 mt-12 gap-8">
-                    <div>
-                        <h3 class="text-xl mb-2"> Thông tin nhóm</h3>
-                        <p></p>
-                    </div>
-                    <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2">
-    
-                       <div class="grid grid-cols-2 gap-3 lg:p-6 p-4">
-                        <div class="col-span-2">
-                            <label for=""> Tên nhóm</label>
-                            <input type="text" placeholder="tên tài khoản" class="shadow-none bg-gray-100">
-                        </div>
-                            <div class="col-span-2">
-                                <label for="about">Mô tả</label>  
-                                <textarea id="about" name="about" rows="3" placeholder="Mô tả nhóm"  class="shadow-none bg-gray-100"></textarea>
-                            </div> 
-                            <div>
-                                <label for=""> Tình trạng nhóm </label>
-                                <select id="relationship" name="relationship"  class="shadow-none bg-gray-100">
-                                 <option value="0">Công khai</option>
-                                 <option value="1">Nhóm kín</option>
-                               </select>
-                             </div>
- 
-                            
-                       </div> 
-    
-                       <div class="bg-gray-10 p-6 pt-0 flex justify-end space-x-3">
-                            <button class="p-2 px-4 rounded bg-gray-50 text-red-500"> Khôi phục </button>
-                           <button class="p-2 px-4 rounded bg-gray-50 text-red-500"> Huỷ </button>
-                           <button type="button" class="button bg-blue-700"> Lưu </button>
-                       </div>
-    
-                    </div>
-
-                </div>
-
+    <div class="container m-auto">
+        <div class="grid lg:grid-cols-3 mt-12 gap-8">
+            <!-- Thông tin nhóm -->
+            <div>
+                <h3 class="text-xl mb-2">Thông tin nhóm</h3>
+                <p class="text-sm text-gray-500">Chỉnh sửa thông tin cơ bản của nhóm</p>
             </div>
-            <div class="container m-auto">
-
-                <div class="grid lg:grid-cols-3 mt-12 gap-8">
-            
-                    <!-- Tiêu đề -->
+            <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2">
+                <form method="POST" action="{% url 'update_group' group.id %}" enctype="multipart/form-data" class="p-6 space-y-4">
+                    {% csrf_token %}
+                    <div class="col-span-2">
+                        <label for="name" class="text-sm font-medium text-gray-700">Tên nhóm</label>
+                        <input type="text" id="name" name="name" value="{{ group.name }}" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    </div>
+                    <div class="col-span-2">
+                        <label for="description" class="text-sm font-medium text-gray-700">Mô tả</label>
+                        <textarea id="description" name="description" rows="4" required
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ group.description }}</textarea>
+                    </div>
                     <div>
-                        <h3 class="text-xl mb-2">Danh sách thành viên nhóm</h3>
-                        <p class="text-sm text-gray-500">Quản lý thành viên và quyền trong nhóm.</p>
+                        <label for="is_private" class="text-sm font-medium text-gray-700">Tình trạng nhóm</label>
+                        <select id="is_private" name="is_private" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <option value="false" {% if not group.is_private %}selected{% endif %}>Công khai</option>
+                            <option value="true" {% if group.is_private %}selected{% endif %}>Nhóm kín</option>
+                        </select>
                     </div>
-            
-                    <!-- Danh sách thành viên -->
-                    <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2 divide-y divide-gray-100">
-            
-                        <!-- Thành viên 1 -->
-                        <div class="flex items-center justify-between p-4">
-                            <div class="flex items-center space-x-4">
-                                <img src="{% static 'assets/images/avatars/avatar_1.jpg' %}" class="w-10 h-10 rounded-full object-cover" alt="Avatar Công Minh">
-                                <div>
-                                    <span class="block font-semibold text-gray-800">Công Minh</span>
-                                    <span class="text-sm text-gray-500">Thành viên</span>
-                                </div>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button class="px-3 py-1 text-sm border rounded-full text-red-500 border-red-500 hover:bg-red-50">Yêu cầu rời nhóm</button>
-                                <button class="px-3 py-1 text-sm border rounded-full text-blue-600 border-blue-600 hover:bg-blue-50">Cấp quyền quản trị</button>
-                            </div>
-                        </div>
-            
-                        <!-- Thành viên 2 -->
-                        <div class="flex items-center justify-between p-4">
-                            <div class="flex items-center space-x-4">
-                                <img src="{% static 'assets/images/avatars/avatar_4.jpg' %}" class="w-10 h-10 rounded-full object-cover" alt="Avatar Khánh Bình">
-                                <div>
-                                    <span class="block font-semibold text-gray-800">Khánh Bình</span>
-                                    <span class="text-sm text-gray-500">Quản trị viên</span>
-                                </div>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button class="px-3 py-1 text-sm border rounded-full text-red-500 border-red-500 hover:bg-red-50">Yêu cầu rời nhóm</button>
-                                <button class="px-3 py-1 text-sm border rounded-full text-red-500 border-red-500 hover:bg-red-50">Gỡ quyền quản trị</button>
-                            </div>
-                        </div>
-            
-                        <!-- Thành viên 3 -->
-                        <div class="flex items-center justify-between p-4">
-                            <div class="flex items-center space-x-4">
-                                <img src="{% static 'assets/images/avatars/avatar_5.jpg' %}" class="w-10 h-10 rounded-full object-cover" alt="Avatar Nhóm báo cáo">
-                                <div>
-                                    <span class="block font-semibold text-gray-800">Thuỳ Linh</span>
-                                    <span class="text-sm text-gray-500">Thành viên</span>
-                                </div>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button class="px-3 py-1 text-sm border rounded-full text-red-500 border-red-500 hover:bg-red-50">Yêu cầu rời nhóm</button>
-                                <button class="px-3 py-1 text-sm border rounded-full text-blue-600 border-blue-600 hover:bg-blue-50">Cấp quyền quản trị</button>
-                            </div>
-                        </div>
-            
+                    <div class="pt-4 flex justify-end space-x-3">
+                        <button type="button" onclick="location.href='{% url 'group_detail' group.id %}'"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                            Hủy
+                        </button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                            Lưu thay đổi
+                        </button>
                     </div>
-            
-                </div>
-            
+                </form>
             </div>
-            
-            
         </div>
 
+        <!-- Quản lý thành viên -->
+        <div class="grid lg:grid-cols-3 mt-12 gap-8">
+            <div>
+                <h3 class="text-xl mb-2">Danh sách thành viên nhóm</h3>
+                <p class="text-sm text-gray-500">Quản lý thành viên và quyền trong nhóm</p>
+            </div>
+            <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2 divide-y divide-gray-100">
+                {% for member in group.members.all %}
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ member.user.profile.profileimg.url }}" class="w-10 h-10 rounded-full object-cover" alt="Avatar {{ member.user.username }}">
+                        <div>
+                            <span class="block font-semibold text-gray-800">{{ member.user.username }}</span>
+                            <span class="text-sm text-gray-500">
+                                {% if member.user == group.admin %}
+                                    Quản trị viên
+                                {% else %}
+                                    Thành viên
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% if member.user != group.admin %}
+                    <div class="flex space-x-2">
+                        <form method="POST" action="{% url 'remove_member' group.id member.user.id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3 py-1 text-sm border rounded-full text-red-500 border-red-500 hover:bg-red-50">
+                                Yêu cầu rời nhóm
+                            </button>
+                        </form>
+                        {% if member.user != request.user %}
+                        <form method="POST" action="{% url 'toggle_admin' group.id member.user.id %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3 py-1 text-sm border rounded-full text-blue-600 border-blue-600 hover:bg-blue-50">
+                                {% if member.is_admin %}
+                                    Gỡ quyền quản trị
+                                {% else %}
+                                    Cấp quyền quản trị
+                                {% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Yêu cầu tham gia đang chờ -->
+        {% if pending_requests %}
+        <div class="grid lg:grid-cols-3 mt-12 gap-8">
+            <div>
+                <h3 class="text-xl mb-2">Yêu cầu tham gia đang chờ</h3>
+                <p class="text-sm text-gray-500">Xử lý các yêu cầu tham gia nhóm</p>
+            </div>
+            <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2 divide-y divide-gray-100">
+                {% for request in pending_requests %}
+                <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-4">
+                        <img src="{{ request.user.profile.profileimg.url }}" class="w-10 h-10 rounded-full object-cover" alt="Avatar {{ request.user.username }}">
+                        <span class="block font-semibold text-gray-800">{{ request.user.username }}</span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <form method="POST" action="{% url 'handle_join_request' request.id %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="px-3 py-1 text-sm border rounded-full text-red-500 border-red-500 hover:bg-red-50">
+                                Từ chối
+                            </button>
+                        </form>
+                        <form method="POST" action="{% url 'handle_join_request' request.id %}" class="inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="accept">
+                            <button type="submit" class="px-3 py-1 text-sm border rounded-full text-green-500 border-green-500 hover:bg-green-50">
+                                Chấp nhận
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
+    {% include 'partials/_footer.html' %}
 
-    
-
- <!-- Scripts
-    ================================================== -->
-    <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>  
+    <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
     <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'assets/js/uikit.js' %}"></script>
     <script src="{% static 'assets/js/simplebar.js' %}"></script>
     <script src="{% static 'assets/js/custom.js' %}"></script>
-
-
     <script src="{% static '../../unpkg.com/ionicons%405.2.3/dist/ionicons.js' %}"></script>
 </body>
-
 </html>
