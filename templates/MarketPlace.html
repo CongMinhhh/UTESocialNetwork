@@ -1,0 +1,244 @@
+{% load static %}
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UTE Marketplace</title>
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/marketplace_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="/">UTESocialMedia</a>
+            </div>
+            <div class="search-bar">
+                <form action="/search-market" method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="search_query" placeholder="Tìm kiếm sản phẩm...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="/profile/{{user_profile.user.username}}"><i class="fa fa-user"></i> Trang cá nhân</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
+                    <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li class="profile-menu">
+                        <a href="#">
+                            <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="/settings"><i class="fa fa-cog"></i> Quản lý tài khoản</a></li>
+                                <li><a href="logout"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container marketplace-content">
+        <aside class="marketplace-sidebar">
+            <div class="categories">
+                <h3>Danh mục</h3>
+                <ul>
+                    <li><a href="?category=all" {% if not category %}class="active"{% endif %}>Tất cả</a></li>
+                    <li><a href="?category=books" {% if category == 'books' %}class="active"{% endif %}>Sách & Tài liệu</a></li>
+                    <li><a href="?category=electronics" {% if category == 'electronics' %}class="active"{% endif %}>Điện tử</a></li>
+                    <li><a href="?category=fashion" {% if category == 'fashion' %}class="active"{% endif %}>Thời trang</a></li>
+                    <li><a href="?category=others" {% if category == 'others' %}class="active"{% endif %}>Khác</a></li>
+                </ul>
+            </div>
+            <div class="price-filter">
+                <h3>Lọc theo giá</h3>
+                <form action="" method="GET">
+                    <div class="price-inputs">
+                        <input type="number" name="min_price" placeholder="Giá thấp nhất" value="{{ min_price }}">
+                        <input type="number" name="max_price" placeholder="Giá cao nhất" value="{{ max_price }}">
+                    </div>
+                    <button type="submit">Áp dụng</button>
+                </form>
+            </div>
+        </aside>
+
+        <section class="marketplace-main">
+            <div class="marketplace-header">
+                <h2>Marketplace</h2>
+                <button class="create-listing-btn">
+                    <i class="fa fa-plus"></i> Đăng bán
+                </button>
+            </div>
+
+            <div class="products-grid">
+                {% for product in products %}
+                <div class="product-card">
+                    <div class="product-image">
+                        {% if product.images.first %}
+                            <img src="{{ product.images.first.image.url }}" alt="{{ product.title }}">
+                        {% else %}
+                            <img src="{% static 'images/default-product.png' %}" alt="Default product image">
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        <h3>{{ product.title }}</h3>
+                        <p class="price">{{ product.price|floatformat:0 }} VNĐ</p>
+                        <p class="location"><i class="fa fa-map-marker"></i> {{ product.location }}</p>
+                        <div class="product-meta">
+                            <span class="timestamp">{{ product.created_at|timesince }} trước</span>
+                            <span class="seller">
+                                <a href="/profile/{{ product.seller.username }}">
+                                    <img src="{{ product.seller.profile.profileimg.url }}" alt="{{ product.seller.username }}">
+                                    {{ product.seller.username }}
+                                </a>
+                            </span>
+                        </div>
+                        <div class="product-actions">
+                            <a href="{% url 'product_detail' product.id %}" class="view-btn">Xem chi tiết</a>
+                            <button class="message-seller-btn" data-seller-id="{{ product.seller.id }}">
+                                <i class="fa fa-envelope"></i> Nhắn tin
+                            </button>
+                        </div>
+                    </div>
+                    {% if product.seller == request.user %}
+                    <div class="product-options">
+                        <button class="options-btn"><i class="fa fa-ellipsis-v"></i></button>
+                        <div class="options-dropdown">
+                            <ul>
+                                <li>
+                                    <a href="#" class="edit-product-btn" data-product-id="{{ product.id }}">
+                                        <i class="fa fa-edit"></i> Chỉnh sửa
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="#" class="delete-product-btn" data-product-id="{{ product.id }}">
+                                        <i class="fa fa-trash"></i> Xóa
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div class="no-products">
+                    <i class="fa fa-shopping-basket"></i>
+                    <p>Chưa có sản phẩm nào trong danh mục này</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+
+    <!-- Create Listing Modal -->
+    <div id="create-listing-modal" class="modal">
+        <div class="modal-content">
+            <form action="{% url 'create_listing' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h3>Đăng bán sản phẩm</h3>
+                <div class="form-group">
+                    <label for="title">Tên sản phẩm</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Mô tả sản phẩm</label>
+                    <textarea id="description" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="price">Giá (VNĐ)</label>
+                    <input type="number" id="price" name="price" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Danh mục</label>
+                    <select id="category" name="category" required>
+                        <option value="books">Sách & Tài liệu</option>
+                        <option value="electronics">Điện tử</option>
+                        <option value="fashion">Thời trang</option>
+                        <option value="others">Khác</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="location">Địa điểm</label>
+                    <input type="text" id="location" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label for="images">Hình ảnh sản phẩm</label>
+                    <input type="file" id="images" name="images" multiple accept="image/*" required>
+                    <div id="image-preview" class="image-preview"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn">Hủy</button>
+                    <button type="submit" class="submit-btn">Đăng bán</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Listing Modal -->
+    <div id="edit-listing-modal" class="modal">
+        <div class="modal-content">
+            <form id="edit-listing-form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h3>Chỉnh sửa sản phẩm</h3>
+                <div class="form-group">
+                    <label for="edit-title">Tên sản phẩm</label>
+                    <input type="text" id="edit-title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-description">Mô tả sản phẩm</label>
+                    <textarea id="edit-description" name="description" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-price">Giá (VNĐ)</label>
+                    <input type="number" id="edit-price" name="price" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-category">Danh mục</label>
+                    <select id="edit-category" name="category" required>
+                        <option value="books">Sách & Tài liệu</option>
+                        <option value="electronics">Điện tử</option>
+                        <option value="fashion">Thời trang</option>
+                        <option value="others">Khác</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-location">Địa điểm</label>
+                    <input type="text" id="edit-location" name="location" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-images">Thêm hình ảnh mới</label>
+                    <input type="file" id="edit-images" name="images" multiple accept="image/*">
+                    <div id="edit-image-preview" class="image-preview"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn">Hủy</button>
+                    <button type="submit" class="submit-btn">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3>Xác nhận xóa sản phẩm</h3>
+            <p>Bạn có chắc chắn muốn xóa sản phẩm này không? Hành động này không thể hoàn tác.</p>
+            <div class="modal-actions">
+                <button class="cancel-delete-btn">Hủy</button>
+                <button class="confirm-delete-btn">Xóa sản phẩm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/marketplace.js' %}"></script>
+</body>
+</html> 

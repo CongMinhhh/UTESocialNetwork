@@ -1,0 +1,325 @@
+/* General Body Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: #f0f2f5; /* Light grey background */
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navbar (reused from previous examples) */
+.navbar {
+    background-color: #ffffff;
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4a90e2; /* Blue accent */
+}
+
+.navbar nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.navbar nav ul li {
+    margin-right: 25px;
+}
+
+.navbar nav ul li a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar nav ul li a:hover {
+    color: #4a90e2;
+}
+
+.search-bar input {
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 20px;
+    outline: none;
+    font-size: 14px;
+    width: 200px;
+}
+
+/* --- Create Group Page Specific Styles --- */
+
+.create-group-page-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align to top, not center vertically */
+    padding: 30px 0;
+}
+
+.create-group-box {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px; /* Wider box for more form fields */
+    text-align: center;
+}
+
+.create-group-box h1 {
+    font-size: 32px;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.create-group-box .subtitle {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+/* Form Styles (reused from settings pages) */
+.create-group-form {
+    width: 100%;
+    text-align: left; /* Align form labels and inputs to the left */
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+    font-size: 15px;
+}
+
+.form-group label small {
+    font-weight: 400;
+    color: #888;
+    margin-left: 5px;
+}
+
+.create-group-form input[type="text"],
+.create-group-form input[type="email"],
+.create-group-form input[type="file"],
+.create-group-form textarea,
+.create-group-form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    transition: border-color 0.3s ease;
+}
+
+.create-group-form input:focus,
+.create-group-form textarea:focus,
+.create-group-form select:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.create-group-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Custom file input style (basic) */
+.create-group-form input[type="file"] {
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* Checkbox Styles (reused) */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto; /* Override full width */
+    margin-right: 10px;
+    transform: scale(1.2); /* Slightly larger checkbox */
+    accent-color: #4a90e2; /* Custom checkbox color */
+}
+
+.checkbox-group label {
+    margin-bottom: 0; /* Remove bottom margin for labels in checkbox group */
+    font-weight: 400; /* Regular weight for checkbox labels */
+}
+
+
+.create-group-button {
+    width: 100%;
+    padding: 15px;
+    background-color: #28a745; /* Green for creation */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px; /* Space above button */
+}
+
+.create-group-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+
+/* Footer (reused from previous examples) */
+.footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 30px;
+}
+
+.footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.footer ul li {
+    margin-left: 20px;
+}
+
+.footer ul li a {
+    text-decoration: none;
+    color: #ccc;
+    transition: color 0.3s ease;
+}
+
+.footer ul li a:hover {
+    color: #fff;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar .container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .navbar nav ul {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .navbar nav ul li {
+        margin: 0 10px 10px 10px;
+    }
+
+    .search-bar {
+        margin-top: 10px;
+    }
+
+    .create-group-box {
+        padding: 30px;
+    }
+
+    .create-group-box h1 {
+        font-size: 28px;
+    }
+
+    .create-group-box .subtitle {
+        font-size: 14px;
+    }
+
+    .create-group-form input,
+    .create-group-form textarea,
+    .create-group-form select,
+    .create-group-button {
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    .footer .container {
+        flex-direction: column;
+    }
+
+    .footer ul {
+        margin-top: 10px;
+    }
+
+    .footer ul li {
+        margin: 0 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar .logo {
+        font-size: 20px;
+    }
+
+    .navbar nav ul li {
+        margin: 0 5px 10px 5px;
+    }
+
+    .search-bar input {
+        width: 150px;
+    }
+
+    .create-group-box {
+        padding: 20px;
+    }
+
+    .create-group-box h1 {
+        font-size: 24px;
+    }
+
+    .create-group-form input,
+    .create-group-form textarea,
+    .create-group-form select,
+    .create-group-button {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+    }
+}

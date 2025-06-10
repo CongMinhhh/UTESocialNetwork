@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <link href="{% static 'new_css/register_style.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 </head>
 
@@ -25,32 +27,16 @@
     <div id="wrapper" class="flex flex-col justify-between h-screen">
 
         <!-- header-->
-        <div class="bg-white py-4 shadow dark:bg-gray-800">
-            <div class="max-w-6xl mx-auto">
-
-
-                <div class="flex items-center lg:justify-between justify-around">
-
-                    <a href="trending.html">
-                        <b><h1 style="font-size: 1.5rem;">UTE Social Media</h1></b>
-                    </a>
-
-                    <div class="capitalize flex font-semibold hidden lg:block my-2 space-x-3 text-center text-sm">
-                        
-                        <a href="/signin" class="bg-pink-500 pink-500 px-6 py-3 rounded-md shadow text-white">Đăng nhập</a>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+        <header class="header">
+            <a href="" class="header-logo">UTE Social Media</a>
+            <a href="/signin" class="signin-button">Đăng nhập</a>
+        </header>
 
         <!-- Content-->
 
         <div>
             <div class="lg:p-12 max-w-md max-w-xl lg:my-0 my-12 mx-auto p-6 space-y-">
-                <h1 class="lg:text-3xl text-xl font-semibold mb-6"> Đăng ký</h1>
                 
-
                 <div>
                     <style>
                         h5{
@@ -63,28 +49,41 @@
                 </div>
                 
                 
-                <form action="" method="POST">
-                    {% csrf_token %}
-                    <!--<div class="flex lg:flex-row flex-col lg:space-x-2">
-                        <input type="text" placeholder="First Name"  class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
-                        <input type="text" placeholder="Last Name" class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
-                    </div>-->
-                    <input type="text" name="username" placeholder="Username" class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
-                    <input type="email" name="email" placeholder="Email" class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
-                    <input type="password" name="password" placeholder="Password" class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
-                    <input type="password" name="password2" placeholder="Confirm Password" class="bg-gray-200 mb-2 shadow-none  dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
-                    <!-- <div class="flex justify-start my-4 space-x-1">
-                        <div class="checkbox">
-                            <input type="checkbox" id="chekcbox1" checked>
-                            <label for="chekcbox1"><span class="checkbox-icon"></span> I Agree</label>
+                <div class="register-container">
+                    <div class="register-box">
+                        <div class="logo-area">
+                            <h1 class="logo">UTE Social Media</h1>
+                            <p>Tham gia cộng đồng và kết nối với mọi người!</p>
                         </div>
-                        <a href="#"> Terms and Conditions</a>
-                    </div> -->
-                    <button type="submit" class="bg-gradient-to-br from-pink-500 py-3 rounded-md text-white text-xl to-red-400 w-full">Sign Up</button>
-                    <div class="text-center mt-5 space-x-2">
-                        <p class="text-base"> Bạn đã có tài khoản? <a href="/signin"> Đăng nhập tại đây </a></p>
+                        
+                        <form class="register-form" action="" method="POST">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <label for="username" class="sr-only">Tên người dùng</label>
+                                <input type="text" id="username" name="username" placeholder="Username" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="email" class="sr-only">Email</label>
+                                <input type="email" id="email" name="email" placeholder="Email" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="password" class="sr-only">Mật khẩu</label>
+                                <input type="password" id="password" name="password" placeholder="Password" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="password2" class="sr-only">Xác nhận mật khẩu</label>
+                                <input type="password" id="password2" name="password2" placeholder="Xác nhận mật khẩu" required>
+                            </div>
+                            <button type="submit" class="register-button">Đăng ký</button>
+                            <div class="terms-privacy">
+                                Bằng cách nhấp vào "Đăng ký", bạn đồng ý với <a href="#">Điều khoản</a> và <a href="#">Chính sách bảo mật</a> của chúng tôi.
+                            </div>
+                            <div class="have-account">
+                                Bạn đã có tài khoản? <a href="/signin">Đăng nhập</a>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
 
 
 

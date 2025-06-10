@@ -1,0 +1,562 @@
+/* General Body Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: #f0f2f5; /* Light grey background */
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navbar (reused from previous examples) */
+.navbar {
+    background-color: #ffffff;
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4a90e2; /* Blue accent */
+}
+
+.navbar nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.navbar nav ul li {
+    margin-right: 25px;
+}
+
+.navbar nav ul li a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar nav ul li a:hover {
+    color: #4a90e2;
+}
+
+.search-bar input {
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 20px;
+    outline: none;
+    font-size: 14px;
+    width: 200px;
+}
+
+/* --- Settings Page Specific Styles --- */
+
+.settings-page-content {
+    display: flex;
+    gap: 20px;
+    padding: 30px 0;
+    align-items: flex-start; /* Align sidebar and main content at the top */
+}
+
+/* Settings Sidebar */
+.settings-sidebar {
+    flex: 1;
+    max-width: 250px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 20px;
+    position: sticky; /* Make sidebar sticky */
+    top: 20px; /* Distance from top of viewport */
+}
+
+.settings-sidebar h2 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: #333;
+    font-size: 22px;
+}
+
+.settings-sidebar .group-name-sidebar {
+    font-size: 14px;
+    color: #777;
+    margin-top: 0;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.settings-sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.settings-sidebar nav ul li {
+    margin-bottom: 10px;
+}
+
+.settings-sidebar nav ul li a {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.settings-sidebar nav ul li a:hover {
+    background-color: #e0f2f7; /* Light blue hover */
+    color: #4a90e2;
+}
+
+.settings-sidebar nav ul li a.active {
+    background-color: #4a90e2; /* Active tab blue */
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Settings Main Content */
+.settings-main-content {
+    flex: 3;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    padding: 30px;
+}
+
+.settings-section {
+    display: none; /* Hidden by default, shown by JS */
+}
+
+.settings-section.active-section {
+    display: block;
+}
+
+.settings-section h3 {
+    margin-top: 0;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 24px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+/* Form Styles */
+.settings-form .form-group {
+    margin-bottom: 25px;
+}
+
+.settings-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+    font-size: 15px;
+}
+
+.settings-form input[type="text"],
+.settings-form input[type="email"],
+.settings-form input[type="password"],
+.settings-form input[type="file"],
+.settings-form textarea,
+.settings-form select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+    transition: border-color 0.3s ease;
+}
+
+.settings-form input:focus,
+.settings-form textarea:focus,
+.settings-form select:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.settings-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.save-button {
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+    background-color: #3a7bd2;
+}
+
+/* Checkbox Styles */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: auto; /* Override full width */
+    margin-right: 10px;
+    transform: scale(1.2); /* Slightly larger checkbox */
+    accent-color: #4a90e2; /* Custom checkbox color */
+}
+
+/* Members Management List */
+.member-management-list {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 15px;
+    background-color: #f9f9f9;
+}
+
+.member-item-manage {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.member-item-manage:last-child {
+    border-bottom: none;
+}
+
+.member-item-manage img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.member-item-manage .member-info {
+    flex-grow: 1;
+}
+
+.member-item-manage span {
+    display: block;
+    font-weight: 500;
+    color: #333;
+}
+
+.member-item-manage .member-role {
+    font-size: 13px;
+    color: #777;
+}
+
+.member-item-manage .member-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.member-role-select {
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.remove-member-button {
+    background-color: #dc3545; /* Red for remove */
+    color: #fff;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.remove-member-button:hover {
+    background-color: #c82333;
+}
+
+.no-members {
+    text-align: center;
+    color: #777;
+    padding: 20px;
+}
+
+/* Image Previews */
+.current-image-preview {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px dashed #ddd;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #fcfcfc;
+}
+
+.current-image-preview p {
+    margin-top: 0;
+    color: #777;
+    font-size: 14px;
+}
+
+.current-image-preview img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    display: block;
+    margin: 10px auto 0 auto; /* Center image */
+}
+
+/* Danger Zone */
+.danger-card {
+    border: 1px solid #ffc107; /* Orange border for caution */
+    background-color: #fffaf0; /* Light orange background */
+    margin-bottom: 20px;
+}
+
+.danger-card h4 {
+    color: #e0a800; /* Darker orange text */
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.danger-card p {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.danger-button {
+    background-color: #dc3545; /* Red for delete */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.danger-button.archive-button {
+    background-color: #ffc107; /* Orange for archive */
+    color: #333;
+}
+
+.danger-button.archive-button:hover {
+    background-color: #e0a800;
+}
+
+.danger-button.delete-button:hover {
+    background-color: #c82333;
+}
+
+/* Footer (reused from previous examples) */
+.footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 30px;
+}
+
+.footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.footer ul li {
+    margin-left: 20px;
+}
+
+.footer ul li a {
+    text-decoration: none;
+    color: #ccc;
+    transition: color 0.3s ease;
+}
+
+.footer ul li a:hover {
+    color: #fff;
+}
+
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .settings-page-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .settings-sidebar,
+    .settings-main-content {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .settings-sidebar {
+        position: static; /* Remove sticky on small screens */
+        top: auto;
+        margin-bottom: 20px;
+    }
+
+    .settings-sidebar nav ul {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .settings-sidebar nav ul li {
+        margin-bottom: 0; /* Remove vertical margin */
+    }
+
+    .settings-sidebar h2,
+    .settings-sidebar .group-name-sidebar {
+        text-align: center;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar .container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .navbar nav ul {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .navbar nav ul li {
+        margin: 0 10px 10px 10px;
+    }
+
+    .search-bar {
+        margin-top: 10px;
+    }
+
+    .footer .container {
+        flex-direction: column;
+    }
+
+    .footer ul {
+        margin-top: 10px;
+    }
+
+    .footer ul li {
+        margin: 0 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar .logo {
+        font-size: 20px;
+    }
+
+    .navbar nav ul li {
+        margin: 0 5px 10px 5px;
+    }
+
+    .search-bar input {
+        width: 150px;
+    }
+
+    .settings-sidebar,
+    .settings-main-content {
+        padding: 15px;
+    }
+
+    .settings-sidebar h2 {
+        font-size: 20px;
+    }
+
+    .settings-section h3 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .settings-form label {
+        font-size: 14px;
+    }
+
+    .settings-form input,
+    .settings-form textarea,
+    .settings-form select,
+    .save-button,
+    .danger-button {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .member-item-manage {
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .member-item-manage img {
+        margin-right: 0;
+    }
+
+    .member-item-manage .member-info {
+        flex-basis: 100%; /* Take full width */
+    }
+
+    .member-item-manage .member-actions {
+        flex-basis: 100%; /* Take full width */
+        justify-content: center;
+    }
+
+    .member-role-select {
+        font-size: 12px;
+        padding: 5px 7px;
+    }
+
+    .remove-member-button {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .current-image-preview img {
+        max-width: 80%;
+    }
+}

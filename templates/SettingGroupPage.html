@@ -7,71 +7,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{% static 'assets/images/favicon.png' %}" rel="icon" type="image/png">
     <title>Cài đặt nhóm - {{ group.name }}</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'new_css/group_settings_style.css' %}">
 </head>
 
 <body>
-    {% include 'partials/_header.html' %}
-
-    <div class="container m-auto">
-        <div class="grid lg:grid-cols-3 mt-12 gap-8">
-            <!-- Thông tin nhóm -->
-            <div>
-                <h3 class="text-xl mb-2">Thông tin nhóm</h3>
-                <p class="text-sm text-gray-500">Chỉnh sửa thông tin cơ bản của nhóm</p>
-            </div>
-            <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2">
-                <form method="POST" action="{% url 'update_group' group.id %}" enctype="multipart/form-data" class="p-6 space-y-4">
+    <header class="navbar">
+        <div class="container">
+            <div class="logo">UTESocialMedia</div>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'index' %}">Trang chủ</a></li>
+                    <li><a href="{% url 'profile' request.user.username %}">Trang cá nhân</a></li>
+                    <li><a href="{% url 'search' %}">Tìm kiếm</a></li>
+                </ul>
+            </nav>
+            <div class="search-bar">
+                <form action="/search" method="POST" style="display: flex; align-items: center;">
                     {% csrf_token %}
-                    <div class="col-span-2">
-                        <label for="name" class="text-sm font-medium text-gray-700">Tên nhóm</label>
-                        <input type="text" id="name" name="name" value="{{ group.name }}" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <input type="text" name="username" placeholder="Tìm kiếm người hoặc nhóm">
+                    <button type="submit" style="border: none; background: none; cursor: pointer; margin-left: 10px;">
+                        <i class="fa fa-search fa-1x"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <main class="container settings-page-content">
+        <aside class="settings-sidebar">
+            <h2>Cài đặt nhóm</h2>
+            <p class="group-name-sidebar">{{ group.name }}</p>
+            <nav>
+                <ul>
+                    <li><a href="#general" class="active">Thông tin chung</a></li>
+                    <li><a href="#members">Thành viên</a></li>
+                    <li><a href="#requests">Yêu cầu tham gia</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <section class="settings-main-content">
+            <!-- Thông tin nhóm -->
+            <div id="general" class="settings-section active-section">
+                <h3>Thông tin nhóm</h3>
+                <form method="POST" action="{% url 'update_group' group.id %}" enctype="multipart/form-data" class="settings-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name">Tên nhóm</label>
+                        <input type="text" id="name" name="name" value="{{ group.name }}" required>
                     </div>
-                    <div class="col-span-2">
-                        <label for="description" class="text-sm font-medium text-gray-700">Mô tả</label>
-                        <textarea id="description" name="description" rows="4" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ group.description }}</textarea>
+                    <div class="form-group">
+                        <label for="description">Mô tả</label>
+                        <textarea id="description" name="description" rows="6" required>{{ group.description }}</textarea>
                     </div>
-                    <div>
-                        <label for="is_private" class="text-sm font-medium text-gray-700">Tình trạng nhóm</label>
-                        <select id="is_private" name="is_private" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <div class="form-group">
+                        <label for="is_private">Tình trạng nhóm</label>
+                        <select id="is_private" name="is_private">
                             <option value="false" {% if not group.is_private %}selected{% endif %}>Công khai</option>
                             <option value="true" {% if group.is_private %}selected{% endif %}>Nhóm kín</option>
                         </select>
                     </div>
-                    <div class="pt-4 flex justify-end space-x-3">
-                        <button type="button" onclick="location.href='{% url 'group_detail' group.id %}'"
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                    <div class="form-actions">
+                        <button type="button" onclick="location.href='{% url 'group_detail' group.id %}'" class="cancel-button">
                             Hủy
                         </button>
-                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                        <button type="submit" class="save-button">
                             Lưu thay đổi
                         </button>
                     </div>
                 </form>
             </div>
-        </div>
 
-        <!-- Quản lý thành viên -->
-        <div class="grid lg:grid-cols-3 mt-12 gap-8">
-            <div>
-                <h3 class="text-xl mb-2">Danh sách thành viên nhóm</h3>
-                <p class="text-sm text-gray-500">Quản lý thành viên và quyền trong nhóm</p>
-            </div>
-            <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2 divide-y divide-gray-100">
-                {% for member in group.members.all %}
-                <div class="flex items-center justify-between p-4">
-                    <div class="flex items-center space-x-4">
-                        <img src="{{ member.user.profile.profileimg.url }}" class="w-10 h-10 rounded-full object-cover" alt="Avatar {{ member.user.username }}">
-                        <div>
-                            <span class="block font-semibold text-gray-800">{{ member.user.username }}</span>
-                            <span class="text-sm text-gray-500">
+            <!-- Quản lý thành viên -->
+            <div id="members" class="settings-section">
+                <h3>Danh sách thành viên nhóm</h3>
+                <div class="member-management-list">
+                    {% for member in group.members.all %}
+                    <div class="member-item-manage">
+                        <img src="{{ member.user.profile.profileimg.url }}" alt="Avatar {{ member.user.username }}">
+                        <div class="member-info">
+                            <span>{{ member.user.username }}</span>
+                            <span class="member-role">
                                 {% if member.user == group.admin %}
                                     Quản trị viên
                                 {% else %}
@@ -79,78 +96,113 @@
                                 {% endif %}
                             </span>
                         </div>
-                    </div>
-                    {% if member.user != group.admin %}
-                    <div class="flex space-x-2">
-                        <form method="POST" action="{% url 'remove_member' group.id member.user.id %}" class="inline">
-                            {% csrf_token %}
-                            <button type="submit" class="px-3 py-1 text-sm border rounded-full text-red-500 border-red-500 hover:bg-red-50">
-                                Yêu cầu rời nhóm
-                            </button>
-                        </form>
-                        {% if member.user != request.user %}
-                        <form method="POST" action="{% url 'toggle_admin' group.id member.user.id %}" class="inline">
-                            {% csrf_token %}
-                            <button type="submit" class="px-3 py-1 text-sm border rounded-full text-blue-600 border-blue-600 hover:bg-blue-50">
-                                {% if member.is_admin %}
-                                    Gỡ quyền quản trị
-                                {% else %}
-                                    Cấp quyền quản trị
-                                {% endif %}
-                            </button>
-                        </form>
+                        {% if member.user != group.admin %}
+                        <div class="member-actions">
+                            <form method="POST" action="{% url 'remove_member' group.id member.user.id %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="remove-member-button">
+                                    Yêu cầu rời nhóm
+                                </button>
+                            </form>
+                            {% if member.user != request.user %}
+                            <form method="POST" action="{% url 'toggle_admin' group.id member.user.id %}" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="member-role-select">
+                                    {% if member.is_admin %}
+                                        Gỡ quyền quản trị
+                                    {% else %}
+                                        Cấp quyền quản trị
+                                    {% endif %}
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
                         {% endif %}
                     </div>
-                    {% endif %}
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
-        </div>
 
-        <!-- Yêu cầu tham gia đang chờ -->
-        {% if pending_requests %}
-        <div class="grid lg:grid-cols-3 mt-12 gap-8">
-            <div>
-                <h3 class="text-xl mb-2">Yêu cầu tham gia đang chờ</h3>
-                <p class="text-sm text-gray-500">Xử lý các yêu cầu tham gia nhóm</p>
-            </div>
-            <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2 divide-y divide-gray-100">
-                {% for request in pending_requests %}
-                <div class="flex items-center justify-between p-4">
-                    <div class="flex items-center space-x-4">
-                        <img src="{{ request.user.profile.profileimg.url }}" class="w-10 h-10 rounded-full object-cover" alt="Avatar {{ request.user.username }}">
-                        <span class="block font-semibold text-gray-800">{{ request.user.username }}</span>
+            <!-- Yêu cầu tham gia đang chờ -->
+            {% if pending_requests %}
+            <div id="requests" class="settings-section">
+                <h3>Yêu cầu tham gia đang chờ</h3>
+                <div class="member-management-list">
+                    {% for request in pending_requests %}
+                    <div class="member-item-manage">
+                        <img src="{{ request.user.profile.profileimg.url }}" alt="Avatar {{ request.user.username }}">
+                        <div class="member-info">
+                            <span>{{ request.user.username }}</span>
+                            <span class="member-role">Đang chờ phê duyệt</span>
+                        </div>
+                        <div class="member-actions">
+                            <form method="POST" action="{% url 'handle_join_request' request.id %}" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="reject">
+                                <button type="submit" class="remove-member-button">
+                                    Từ chối
+                                </button>
+                            </form>
+                            <form method="POST" action="{% url 'handle_join_request' request.id %}" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="accept">
+                                <button type="submit" class="save-button">
+                                    Chấp nhận
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <div class="flex space-x-2">
-                        <form method="POST" action="{% url 'handle_join_request' request.id %}" class="inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="reject">
-                            <button type="submit" class="px-3 py-1 text-sm border rounded-full text-red-500 border-red-500 hover:bg-red-50">
-                                Từ chối
-                            </button>
-                        </form>
-                        <form method="POST" action="{% url 'handle_join_request' request.id %}" class="inline">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="accept">
-                            <button type="submit" class="px-3 py-1 text-sm border rounded-full text-green-500 border-green-500 hover:bg-green-50">
-                                Chấp nhận
-                            </button>
-                        </form>
-                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 UTESocial. All rights reserved.</p>
+            <ul>
+                <li><a href="#">Chính sách bảo mật</a></li>
+                <li><a href="#">Điều khoản sử dụng</a></li>
+                <li><a href="#">Liên hệ</a></li>
+            </ul>
         </div>
-        {% endif %}
-    </div>
+    </footer>
 
-    {% include 'partials/_footer.html' %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarLinks = document.querySelectorAll('.settings-sidebar nav ul li a');
+            const settingsSections = document.querySelectorAll('.settings-section');
 
-    <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
-    <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
-    <script src="{% static 'assets/js/uikit.js' %}"></script>
-    <script src="{% static 'assets/js/simplebar.js' %}"></script>
-    <script src="{% static 'assets/js/custom.js' %}"></script>
-    <script src="{% static '../../unpkg.com/ionicons%405.2.3/dist/ionicons.js' %}"></script>
+            // Function to show/hide sections based on active link
+            function showSection(targetId) {
+                settingsSections.forEach(section => {
+                    if (section.id === targetId.substring(1)) {
+                        section.classList.add('active-section');
+                    } else {
+                        section.classList.remove('active-section');
+                    }
+                });
+
+                sidebarLinks.forEach(link => {
+                    if (link.getAttribute('href') === targetId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            // Add click event listeners to sidebar links
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    showSection(targetId);
+                });
+            });
+        });
+    </script>
 </body>
 </html>

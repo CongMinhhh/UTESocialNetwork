@@ -4,6 +4,7 @@ from . import views, group_views
 urlpatterns = [
     path('', views.index, name='index'),
     path('settings', views.settings, name='settings'),
+    path('change-password/', views.change_password, name='change_password'),
     path('upload', views.upload, name='upload'),
     path('follow', views.follow, name='follow'),
     path('search', views.search, name='search'),
@@ -12,6 +13,8 @@ urlpatterns = [
     path('signup', views.signup, name='signup'),
     path('signin', views.signin, name='signin'),
     path('logout', views.logout, name='logout'),
+    path('edit-post/<uuid:post_id>/', views.edit_post, name='edit-post'),
+    path('delete-post/<uuid:post_id>/', views.delete_post, name='delete-post'),
     path('group/create/', group_views.create_group, name='create_group'),
     path('group/<uuid:group_id>/', group_views.group_detail, name='group_detail'),
     path('group/<uuid:group_id>/join/', group_views.join_group, name='join_group'),
@@ -27,4 +30,13 @@ urlpatterns = [
     path('messages/', views.messages_page, name='messages'),
     path('send-message/', views.send_message, name='send_message'),
     path('get-messages/<int:user_id>/', views.get_messages, name='get_messages'),
+    
+    # Marketplace URLs
+    path('marketplace/', views.marketplace, name='marketplace'),
+    path('create-listing/', views.create_listing, name='create_listing'),
+    path('edit-product/<uuid:product_id>/', views.edit_product, name='edit_product'),
+    path('delete-product/<uuid:product_id>/', views.delete_product, name='delete_product'),
+    path('product/<uuid:product_id>/', views.product_detail, name='product_detail'),
+    path('search-market/', views.search_market, name='search_market'),
+    path('marketplace/product/<int:product_id>/', views.product_detail, name='product_detail'),
 ]

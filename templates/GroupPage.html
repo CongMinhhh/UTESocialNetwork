@@ -7,257 +7,166 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{% static 'favicon.png' %}" rel="icon" type="image/png">
     <title>{{ group.name }} - UTE Social Network</title>
-    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
-    <link rel="stylesheet" href="{% static 'css/main.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/color.css' %}">
-    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'new_css/group_page_style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
-    <!-- Header -->
-    <header>
-        <div class="header_inner">
-            <form action="/search" method="POST">
-            {% csrf_token %}
-            <div class="left-side">
-                <div id="logo">
-                    <a href="/">
-                        <b><h1 style="text-transform: uppercase;">UTESocialMedia</h1></b>
-                    </a>
-                </div>
-                <div class="header_search">
-                    <input type="text" name="username" placeholder="Tìm kiếm người hoặc nhóm">&nbsp; &nbsp;
-                    <button type="submit"><i class="fa fa-search fa-1x"></i></button>
-                </div>
-            </div>
-            </form>
-
-            <div class="right-side lg:pr-4">
-                {% if is_member %}
-                <a href="#" uk-toggle="target: #create-post-modal"
-                    class="bg-pink-500 flex font-bold hover:bg-pink-600 hover:text-white inline-block items-center lg:block max-h-10 mr-4 px-4 py-2 rounded shado text-white">
-                    <ion-icon name="add-circle" class="-mb-1 mr-1 opacity-90 text-xl uilus-circle"></ion-icon> Đăng bài
-                </a>
-                {% endif %}
-
-                <a href="#">
-                    {% if request.user.profile.profileimg %}
-                        <img src="{{request.user.profile.profileimg.url}}" class="header-avatar" alt="">
-                    {% else %}
-                        <img src="/media/profile_images/blank-profile-picture.png" class="header-avatar" alt="">
-                    {% endif %}
-                </a>
-                <div uk-drop="mode: click;offset:9" class="header_dropdown profile_dropdown border-t">
-                    <ul>
-                        <li><a href="/settings"> Quản lý tài khoản </a> </li>
-                        <li><a href="/profile/{{request.user.username}}"> Trang cá nhân </a> </li>
-                        <li><a href="/logout"> Đăng xuất</a></li>
-                    </ul>
-                </div>
+    <header class="navbar">
+        <div class="container">
+            <div class="logo">UTESocialMedia</div>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'index' %}">Trang chủ</a></li>
+                    <li><a href="{% url 'profile' request.user.username %}">Trang cá nhân</a></li>
+                    <li><a href="{% url 'search' %}">Tìm kiếm</a></li>
+                </ul>
+            </nav>
+            <div class="search-bar">
+                <form action="/search" method="POST" style="display: flex; align-items: center;">
+                    {% csrf_token %}
+                    <input type="text" name="username" placeholder="Tìm kiếm người hoặc nhóm">
+                    <button type="submit" style="border: none; background: none; cursor: pointer; margin-left: 10px;">
+                        <i class="fa fa-search fa-1x"></i>
+                    </button>
+                </form>
             </div>
         </div>
     </header>
 
-    <!-- Group Profile Section -->
-    <div class="theme-layout">
-        <section>
-            <div class="feature-photo">
-                <figure><img src="{% static 'images/resources/timeline-1.jpg' %}" alt=""></figure>
-                <div class="add-btn">
-                    <span style="color: white; font-size: 27px; margin-right: 480px;">
-                        <b><u>{{ group.name }}</u></b>
-                    </span>
-                    <span style="color: white; font-size: 27px;">
-                        <b>{{ group.posts.count }} Bài đăng</b>
-                    </span>
-                    <span style="color: white; font-size: 27px;">
-                        <b>{{ group.members.count }} Thành viên</b>
-                    </span>
+    <main class="container group-page-content">
+        <!-- Group Header Section -->
+        <section class="group-header">
+            <div class="group-cover-photo">
+                <img src="{% static 'images/resources/timeline-1.jpg' %}" alt="Group Cover Photo">
+            </div>
+            <div class="group-info-bar">
+                <div class="group-icon">
+                    {% if group.profile_image %}
+                        <img src="{{ group.profile_image.url }}" alt="Group Icon">
+                    {% else %}
+                        <img src="{% static 'assets/images/avatars/avatar_gr.jpg' %}" alt="Default Group Icon">
+                    {% endif %}
+                </div>
+                <div class="group-details">
+                    <h1>{{ group.name }}</h1>
+                    <div class="group-stats">
+                        <span><span class="stat-number">{{ group.posts.count }}</span> Bài đăng</span>
+                        <span><span class="stat-number">{{ group.members.count }}</span> Thành viên</span>
+                        <span>Admin: {{ group.admin.username }}</span>
+                    </div>
+                </div>
+                <div class="group-actions">
                     {% if not is_member %}
-                        <button onclick="joinGroup('{{ group.id }}')" class="bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-full">
+                        <button onclick="joinGroup('{{ group.id }}')" class="join-group-button">
                             Tham gia nhóm
                         </button>
                     {% endif %}
                     {% if is_admin %}
-                        <a href="{% url 'group_settings' group.id %}" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full ml-2">
+                        <a href="{% url 'group_settings' group.id %}" class="invite-button">
                             Quản lý nhóm
                         </a>
                     {% endif %}
                 </div>
-
-                <div class="container-fluid">
-                    <div class="row merged">
-                        <div class="col-lg-2 col-sm-3">
-                            <div class="user-avatar">
-                                <figure>
-                                    {% if group.profile_image %}
-                                        <img src="{{ group.profile_image.url }}" style="height: 250px; width: 100%;" alt="">
-                                    {% else %}
-                                        <img src="{% static 'assets/images/avatars/avatar_gr.jpg' %}" style="height: 250px; width: 100%;" alt="">
-                                    {% endif %}
-                                </figure>
-                            </div>
-                        </div>
-                        <div class="col-lg-10 col-sm-9">
-                            <div class="timeline-info">
-                                <ul>
-                                    <li class="admin-name">
-                                        <h5 style="color: black;white-space: nowrap; width: 110px; font-size: 27px;">
-                                            <b>{{ group.name }}</b>
-                                        </h5>
-                                        <span>Admin: {{ group.admin.username }}</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
 
-        <section>
-            <div class="bio">
-                {{ group.description }}
+        <!-- Group Description -->
+        <section class="group-section active-section">
+            <div class="card about-content">
+                <p>{{ group.description }}</p>
             </div>
         </section>
 
         <!-- Posts Section -->
-        <section>
-            <div class="gap gray-bg">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="row" id="page-contents">
-                                <div class="col-lg-3">
-                                    <aside class="sidebar static">
-                                    </aside>
-                                </div>
+        <section class="group-section active-section">
+            {% if is_member %}
+            <div class="create-post card">
+                <a href="#" uk-toggle="target: #create-post-modal" class="create-post-button">
+                    <textarea placeholder="Viết gì đó cho nhóm..." readonly></textarea>
+                    <button>Đăng bài</button>
+                </a>
+            </div>
+            {% endif %}
 
-                                <div class="col-lg-6">
-                                    <div class="central-meta">
-                                        <ul class="photos">
-                                            {% for post in posts reversed %}
-                                            <li>
-                                                {% if post.image %}
-                                                    <a class="strip" href="{{post.image.url}}" title="" data-strip-group="mygroup" data-strip-group-options="loop: false">
-                                                        <img src="{{post.image.url}}" style="height: 250px; width: 300px;" alt="">
-                                                        <div class="post-info" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 10px;">
-                                                            <div class="post-header" style="display: flex; align-items: center;">
-                                                                {% if post.user.profile.profileimg %}
-                                                                    <img src="{{ post.user.profile.profileimg.url }}" alt="user" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;">
-                                                                {% else %}
-                                                                    <img src="/media/profile_images/blank-profile-picture.png" alt="Default Profile" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 10px;">
-                                                                {% endif %}
-                                                                <span style="font-weight: bold;">{{ post.user.username }}</span>
-                                                            </div>
-                                                            {% if post.content %}
-                                                            <div class="post-text" style="margin-top: 5px;">
-                                                                {{ post.content }}
-                                                            </div>
-                                                            {% endif %}
-                                                            <div class="post-actions" style="display: flex; justify-content: space-between; margin-top: 5px;">
-                                                                <div>
-                                                                    <a href="/like-post?post_id={{post.id}}" style="color: white; text-decoration: none;">
-                                                                        {% if post.no_of_likes == 0 %}
-                                                                        <span>Chưa có lượt thích nào</span>
-                                                                        {% else %}
-                                                                        <span>{{post.no_of_likes}} lượt thích</span>
-                                                                        {% endif %}
-                                                                    </a>
-                                                                </div>
-                                                                {% if post.user == request.user or is_admin %}
-                                                                <div>
-                                                                    <a href="#" onclick="deletePost('{{post.id}}')" style="color: white; text-decoration: none;">
-                                                                        <i class="uil-trash-alt"></i> Xóa
-                                                                    </a>
-                                                                </div>
-                                                                {% endif %}
-                                                            </div>
-                                                        </div>
-                                                    </a>
-                                                {% else %}
-                                                    <div class="post-content" style="padding: 15px; background: #f8f9fa; margin-bottom: 15px; border-radius: 8px; width: 300px;">
-                                                        <div class="post-header" style="display: flex; align-items: center;">
-                                                            {% if post.user.profile.profileimg %}
-                                                                <img src="{{ post.user.profile.profileimg.url }}" alt="user" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
-                                                            {% else %}
-                                                                <img src="/media/profile_images/blank-profile-picture.png" alt="Default Profile" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
-                                                            {% endif %}
-                                                            <span style="font-weight: bold;">{{ post.user.username }}</span>
-                                                        </div>
-                                                        <div class="post-text" style="margin-top: 10px;">
-                                                            {{ post.content }}
-                                                        </div>
-                                                        <div class="post-actions" style="display: flex; justify-content: space-between; margin-top: 10px;">
-                                                            <div>
-                                                                <a href="/like-post?post_id={{post.id}}" style="color: #666; text-decoration: none;">
-                                                                    {% if post.no_of_likes == 0 %}
-                                                                    <span>Chưa có lượt thích nào</span>
-                                                                    {% else %}
-                                                                    <span>{{post.no_of_likes}} lượt thích</span>
-                                                                    {% endif %}
-                                                                </a>
-                                                            </div>
-                                                            {% if post.user == request.user or is_admin %}
-                                                            <div>
-                                                                <a href="#" onclick="deletePost('{{post.id}}')" style="color: #666; text-decoration: none;">
-                                                                    <i class="uil-trash-alt"></i> Xóa
-                                                                </a>
-                                                            </div>
-                                                            {% endif %}
-                                                        </div>
-                                                    </div>
-                                                {% endif %}
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-3">
-                                    <aside class="sidebar static">
-                                    </aside>
-                                </div>
+            <!-- Posts List -->
+            <div class="posts-container">
+                {% for post in posts reversed %}
+                <div class="post-card card">
+                    <div class="post-header">
+                        <div class="post-header-content">
+                        {% if post.user.profile.profileimg %}
+                            <img src="{{ post.user.profile.profileimg.url }}" alt="user">
+                        {% else %}
+                            <img src="/media/profile_images/blank-profile-picture.png" alt="Default Profile">
+                        {% endif %}
+                        <div>
+                            <h4>{{ post.user.username }}</h4>
+                            <span class="timestamp">{{ post.created_at|timesince }} trước</span>
+                        </div>
+                        </div>
+                        {% if post.user == request.user or is_admin %}
+                        <div class="post-options">
+                            <button class="options-btn"><i class="fa fa-ellipsis-v"></i></button>
+                            <div class="options-dropdown">
+                                <ul>
+                                    <li><a href="#" onclick="deletePost('{{post.id}}'); return false;">
+                                        <i class="fa fa-trash"></i> Xóa bài viết
+                                    </a></li>
+                                </ul>
                             </div>
                         </div>
+                        {% endif %}
+                    </div>
+
+                    {% if post.content %}
+                    <p>{{ post.content }}</p>
+                    {% endif %}
+
+                    {% if post.image %}
+                    <img src="{{ post.image.url }}" alt="Post Image" class="post-image">
+                    {% endif %}
+
+                    <div class="post-actions">
+                        <a href="/like-post?post_id={{post.id}}" class="action-link">
+                            {% if post.no_of_likes == 0 %}
+                            <span>👍 Chưa có lượt thích nào</span>
+                            {% else %}
+                            <span>👍 {{post.no_of_likes}} lượt thích</span>
+                            {% endif %}
+                        </a>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </section>
-    </div>
+    </main>
 
-    <!-- Create post modal -->
-    <div id="create-post-modal" class="create-post" uk-modal>
-        <div class="uk-modal-dialog uk-modal-body uk-margin-auto-vertical rounded-lg p-0 lg:w-5/12 relative shadow-2xl uk-animation-slide-bottom-small">
-            <div class="text-center py-4 border-b">
-                <h3 class="text-lg font-semibold">Tạo bài đăng mới trong nhóm</h3>
-                <button class="uk-modal-close-default bg-gray-100 rounded-full p-2.5 m-1 right-2" type="button" uk-close uk-tooltip="title: Close ; pos: bottom ;offset:7"></button>
-            </div>
-            <div class="flex flex-1 items-start space-x-4 p-5">
-                {% if request.user.profile.profileimg %}
-                    <img src="{{request.user.profile.profileimg.url}}" class="bg-gray-200 border border-white rounded-full w-11 h-11">
-                {% else %}
-                    <img src="/media/profile_images/blank-profile-picture.png" class="bg-gray-200 border border-white rounded-full w-11 h-11">
-                {% endif %}
-                <div class="flex-1 pt-2">
-                    <form action="{% url 'create_group_post' group.id %}" method="POST" enctype="multipart/form-data">
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 UTESocial. All rights reserved.</p>
+            <ul>
+                <li><a href="#">Chính sách bảo mật</a></li>
+                <li><a href="#">Điều khoản sử dụng</a></li>
+                <li><a href="#">Liên hệ</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Create Post Modal -->
+    <div id="create-post-modal" class="uk-modal-full" uk-modal>
+        <div class="uk-modal-dialog">
+            <button class="uk-modal-close-full uk-close-large" type="button" uk-close></button>
+            <div class="uk-grid-collapse uk-child-width-1-2@s uk-flex-middle" uk-grid>
+                <div class="uk-padding-large">
+                    <form action="upload-post" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <textarea class="uk-textare text-black shadow-none focus:shadow-none text-xl font-medium resize-none" name="content" rows="5" placeholder="Bạn muốn chia sẻ điều gì?"></textarea>
-                        <div class="flex items-center justify-between mt-4">
-                            <div class="flex space-x-2">
-                                <input type="file" name="image_upload" id="image_upload" class="hidden" accept="image/*">
-                                <label for="image_upload" class="flex items-center cursor-pointer">
-                                    <svg class="bg-blue-100 h-9 p-1.5 rounded text-blue-600 w-9 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                </label>
-                            </div>
-                            <button type="submit" class="bg-blue-600 font-semibold p-2 rounded-md text-white text-sm">Đăng bài</button>
+                        <div class="post-form-container">
+                            <textarea name="content" placeholder="Viết gì đó cho nhóm..."></textarea>
+                            <input type="file" name="image_upload" accept="image/*">
+                            <input type="hidden" name="group_id" value="{{ group.id }}">
+                            <button type="submit" class="create-post-button">Đăng bài</button>
                         </div>
                     </form>
                 </div>
@@ -265,7 +174,6 @@
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
     <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'assets/js/uikit.js' %}"></script>
@@ -275,40 +183,12 @@
 
     <script>
         function joinGroup(groupId) {
-            fetch(`/group/${groupId}/join/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    location.reload();
-                } else {
-                    alert(data.message);
-                }
-            });
+            window.location.href = `/join-group/${groupId}`;
         }
 
         function deletePost(postId) {
-            if (confirm('Bạn có chắc chắn muốn xóa bài đăng này?')) {
-                fetch(`/group/post/${postId}/delete/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': '{{ csrf_token }}',
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        location.reload();
-                    } else {
-                        alert(data.message);
-                    }
-                });
+            if (confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
+                window.location.href = `/delete-post/${postId}`;
             }
         }
     </script>

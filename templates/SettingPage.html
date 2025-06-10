@@ -5,91 +5,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{% static 'assets/images/favicon.png' %}" rel="icon" type="image/png">
-    <title>Cài đặt tài khoản</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
-
+    <title>Cài đặt tài khoản - {{user.username}}</title>
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/profile_settings_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
-
 <body>
-
-            <div id="logo" >
-                <a href="/">
-                    <b><h1 style="text-transform: uppercase;">UTE Social Media</h1></b>
-                </a>
+    <header class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="/">UTESocialMedia</a>
             </div>
-
-            <div class="container m-auto"> 
-
-                <h1 class="text-2xl leading-none text-gray-900 tracking-tight mt-3"><a href="/">Trang chính</a> / Chỉnh sửa trang cá nhân của <b>{{user.username}}</b> </h1>
-                <br>
-                <hr>
-                <div class="grid lg:grid-cols-3 mt-12 gap-8">
-                    <div>
-                        <h3 class="text-xl mb-2"> Thông tin</h3>
-                        <p></p>
-                    </div>
-                    <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2">
-                        
-                    <form action="" method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                       <div class="grid grid-cols-2 gap-3 lg:p-6 p-4">
-                           
-                           
-                            <div class="col-span-2">
-                                <label for=""> Ảnh đại diện</label>
-                                <img width="100" height="100" src="{{user_profile.profileimg.url}}" />
-                                <input type="file" name="image" value="" class="shadow-none bg-gray-100">
-                            </div>
-                            <div class="col-span-2">
-                                <label for="about">Tiểu sử</label>  
-                                <textarea id="about" name="bio" rows="3"  class="shadow-none bg-gray-100">{{user_profile.bio}}</textarea>
-                            </div> 
-                            <div class="col-span-2">
-                                <label for=""> Địa chỉ</label>
-                                <input type="text" name="location" value="{{user_profile.location}}" class="shadow-none bg-gray-100">
-                            </div>
-                            
-                       </div> 
-    
-                       <div class="bg-gray-10 p-6 pt-0 flex justify-end space-x-3">
-                           <button class="p-2 px-4 rounded bg-gray-50 text-red-500"> <a href="/">Huỷ</a> </button>
-                           <button type="submit" class="button bg-blue-700"> Lưu </button>
-                       </div>
-                    </form>
-    
-                    </div>
-
-    
-                    </div>
-                    <br>
-
-                </div>
-
+            <div class="search-bar">
+                <form action="/search" method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="username" placeholder="Tìm kiếm người dùng...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
             </div>
-            
+            <nav>
+                <ul>
+                    <li><a href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
+                    <li><a href="{% url 'create_group' %}"><i class="fa fa-users"></i> Tạo nhóm</a></li>
+                    <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li class="profile-menu">
+                        <a href="#">
+                            <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="/profile/{{user_profile.user.username}}"><i class="fa fa-user"></i> Trang cá nhân</a></li>
+                                <li><a href="/settings"><i class="fa fa-cog"></i> Quản lý tài khoản</a></li>
+                                <li><a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
         </div>
+    </header>
 
-    </div>
+    <main class="container settings-page-content">
+        <aside class="settings-sidebar">
+            <h2>Cài đặt tài khoản</h2>
+            <nav>
+                <ul>
+                    <li><a href="#general" class="active">Thông tin chung</a></li>
+                    <li><a href="#friends">Danh sách bạn bè</a></li>
+                    <li><a href="#groups">Danh sách nhóm</a></li>
+                    <li><a href="#password">Mật khẩu</a></li>
+                </ul>
+            </nav>
+        </aside>
 
+        <section class="settings-main-content">
+            <div id="general" class="settings-section active-section">
+                <h3>Thông tin tài khoản</h3>
+                <form class="settings-form" action="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group cover-photo-group">
+                        <label>Ảnh bìa</label>
+                        <div class="cover-photo-container">
+                            <div class="cover-preview">
+                                <img src="{{ user_profile.cover_photo.url }}" alt="Cover Photo" class="current-cover-photo" id="coverPreview">
+                            </div>
+                            <div class="cover-upload">
+                                <label for="cover_photo" class="upload-label">
+                                    <i class="fa fa-camera"></i> Thay đổi ảnh bìa
+                                </label>
+                                <input type="file" id="cover_photo" name="cover_photo" class="file-input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group profile-image-group">
+                        <label>Ảnh đại diện</label>
+                        <div class="profile-image-container">
+                            <div class="image-wrapper">
+                                <img src="{{user_profile.profileimg.url}}" alt="Profile Picture" class="current-profile-image">
+                            </div>
+                        </div>
+                        <div class="image-upload">
+                            <label for="image" class="upload-label">
+                                <i class="fa fa-camera"></i> Thay đổi ảnh
+                            </label>
+                            <input type="file" id="image" name="image" class="file-input">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Tên người dùng</label>
+                        <input type="text" id="username" value="{{user.username}}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="bio">Tiểu sử</label>
+                        <textarea id="bio" name="bio" rows="4" placeholder="Viết gì đó về bạn...">{{user_profile.bio}}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Địa chỉ</label>
+                        <input type="text" id="location" name="location" value="{{user_profile.location}}" placeholder="Nhập địa chỉ của bạn">
+                    </div>
+                    <div class="form-actions">
+                        <a href="/" type="button" class="cancel-button">Huỷ</a>
+                        <button type="submit" class="save-button">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
 
-    
+            <div id="friends" class="settings-section">
+                <h3>Danh sách bạn bè</h3>
+                <div class="friends-list">
+                    {% for friend in following_users %}
+                    <div class="friend-item">
+                        <div class="friend-info">
+                            <img src="{{ friend.profile.profileimg.url }}" alt="{{ friend.user.username }}">
+                            <div class="friend-details">
+                                <h4>{{ friend.user.username }}</h4>
+                                <p>{{ friend.profile.bio|truncatechars:50 }}</p>
+                            </div>
+                        </div>
+                        <div class="friend-actions">
+                            <form action="/follow" method="POST" style="display: inline;">
+                                {% csrf_token %}
+                                <input type="hidden" value="{{user.username}}" name="follower" />
+                                <input type="hidden" value="{{friend.user.username}}" name="user" />
+                                <button type="submit" class="unfollow-button">Bỏ theo dõi</button>
+                            </form>
+                            <a href="/messages/?user_id={{friend.user.id}}" class="message-button">
+                                <i class="fa fa-envelope"></i> Nhắn tin
+                            </a>
+                            <a href="/profile/{{friend.user.username}}" class="access-button">
+                                <i class="fa fa-user"></i> Truy cập
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="no-items">Bạn chưa theo dõi ai.</p>
+                    {% endfor %}
+                </div>
+            </div>
 
- <!-- Scripts
-    ================================================== -->
-    <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>  
-    <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
-    <script src="{% static 'assets/js/uikit.js' %}"></script>
-    <script src="{% static 'assets/js/simplebar.js' %}"></script>
-    <script src="{% static 'assets/js/custom.js' %}"></script>
+            <div id="groups" class="settings-section">
+                <h3>Danh sách nhóm</h3>
+                <div class="groups-list">
+                    {% for group in user_groups %}
+                    <div class="group-item">
+                        <div class="group-info">
+                            <img src="{{ group.profile_image.url }}" alt="{{ group.name }}">
+                            <div class="group-details">
+                                <h4>{{ group.name }}</h4>
+                                <p>{{ group.description|truncatechars:50 }}</p>
+                            </div>
+                        </div>
+                        <div class="group-actions">
+                            <a href="{% url 'group_detail' group.id %}" class="visit-button">
+                                <i class="fa fa-external-link"></i> Truy cập
+                            </a>
+                            {% if group.admin == user %}
+                            <a href="{% url 'group_settings' group.id %}" class="settings-button">
+                                <i class="fa fa-cog"></i> Quản lý
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="no-items">Bạn chưa tham gia nhóm nào.</p>
+                    {% endfor %}
+                </div>
+            </div>
 
+            <div id="password" class="settings-section">
+                <h3>Đổi mật khẩu</h3>
+                {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-{{ message.tags }}{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <form class="settings-form" action="/change-password/" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="current_password">Mật khẩu hiện tại</label>
+                        <input type="password" id="current_password" name="current_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password">Mật khẩu mới</label>
+                        <input type="password" id="new_password" name="new_password" required>
+                        <small class="password-hint">Mật khẩu phải có ít nhất 8 ký tự</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Xác nhận mật khẩu mới</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="cancel-button" onclick="clearPasswordForm()">Huỷ</button>
+                        <button type="submit" class="save-button">Cập nhật mật khẩu</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
 
-    <script src="{% static '../../unpkg.com/ionicons%405.2.3/dist/ionicons.js' %}"></script>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 UTESocialMedia. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Preview image before upload
+        document.getElementById('image').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('.current-profile-image').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Preview cover photo before upload
+        document.getElementById('cover_photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('coverPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Profile dropdown
+        const profileMenu = document.querySelector('.profile-menu');
+        profileMenu.addEventListener('click', (e) => {
+            const dropdown = profileMenu.querySelector('.profile-dropdown');
+            dropdown.classList.toggle('active');
+            e.stopPropagation();
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            const dropdown = document.querySelector('.profile-dropdown');
+            if (dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Settings navigation
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebarLinks = document.querySelectorAll('.settings-sidebar nav ul li a');
+            const settingsSections = document.querySelectorAll('.settings-section');
+
+            function showSection(targetId) {
+                settingsSections.forEach(section => {
+                    if (section.id === targetId.substring(1)) {
+                        section.classList.add('active-section');
+                    } else {
+                        section.classList.remove('active-section');
+                    }
+                });
+            }
+
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    sidebarLinks.forEach(item => item.classList.remove('active'));
+                    event.target.classList.add('active');
+                    const targetId = event.target.getAttribute('href');
+                    showSection(targetId);
+                });
+            });
+        });
+
+        // Clear password form
+        function clearPasswordForm() {
+            document.getElementById('current_password').value = '';
+            document.getElementById('new_password').value = '';
+            document.getElementById('confirm_password').value = '';
+            
+            // Clear any existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+        }
+    </script>
 </body>
-
 </html>

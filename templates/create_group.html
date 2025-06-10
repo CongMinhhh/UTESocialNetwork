@@ -7,52 +7,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{% static 'assets/images/favicon.png' %}" rel="icon" type="image/png">
     <title>Tạo nhóm mới</title>
-    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/create_group_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
-    <div class="container m-auto">
-        <div class="grid lg:grid-cols-3 mt-12 gap-8">
-            <div>
-                <h3 class="text-xl mb-2">Tạo nhóm mới</h3>
-                <p class="text-sm text-gray-500">Tạo một nhóm mới để kết nối với những người có cùng sở thích.</p>
+    <header class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="/">UTESocialMedia</a>
             </div>
-            <div class="bg-white rounded-md lg:shadow-lg shadow col-span-2">
-                <form method="POST" class="p-6 space-y-4">
+            <div class="search-bar">
+                <form action="/search" method="POST">
                     {% csrf_token %}
-                    <div>
-                        <label for="name" class="text-sm font-medium text-gray-700">Tên nhóm</label>
-                        <input type="text" id="name" name="name" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    </div>
-
-                    <div>
-                        <label for="description" class="text-sm font-medium text-gray-700">Mô tả nhóm</label>
-                        <textarea id="description" name="description" rows="4" required
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
-                    </div>
-
-                    <div class="flex items-center">
-                        <input type="checkbox" id="is_private" name="is_private"
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <label for="is_private" class="ml-2 text-sm text-gray-700">Nhóm riêng tư</label>
-                    </div>
-
-                    <div class="pt-4 flex justify-end space-x-3">
-                        <a href="{% url 'index' %}" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                            Hủy
-                        </a>
-                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                            Tạo nhóm
-                        </button>
-                    </div>
+                    <input type="text" name="username" placeholder="Tìm kiếm người dùng...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
                 </form>
             </div>
+            <nav>
+                <ul>
+                    <li><a href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
+                    <li><a href="{% url 'create_group' %}"><i class="fa fa-users"></i> Tạo nhóm</a></li>
+                    <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li class="profile-menu">
+                        <a href="#">
+                            <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="/profile/{{user_profile.user.username}}"><i class="fa fa-user"></i> Trang cá nhân</a></li>
+                                <li><a href="/settings"><i class="fa fa-cog"></i> Quản lý tài khoản</a></li>
+                                <li><a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
         </div>
-    </div>
+    </header>
+
+    <main class="container create-group-page-content">
+        <div class="create-group-box">
+            <h1>Tạo nhóm mới</h1>
+            <p class="subtitle">Tạo một nhóm mới để kết nối với những người có cùng sở thích.</p>
+
+            <form class="create-group-form" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group cover-photo-group">
+                    <label>Ảnh bìa nhóm</label>
+                    <div class="cover-photo-container">
+                        <div class="cover-preview">
+                            <img src="{% static 'assets/images/default-cover.jpg' %}" alt="Cover Preview" id="coverPreview">
+                        </div>
+                        <div class="cover-upload">
+                            <label for="cover_photo" class="upload-label">
+                                <i class="fa fa-camera"></i> Chọn ảnh bìa
+                            </label>
+                            <input type="file" id="cover_photo" name="cover_photo" class="file-input" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group avatar-group">
+                    <label>Ảnh đại diện nhóm</label>
+                    <div class="avatar-container">
+                        <div class="avatar-preview">
+                            <img src="{% static 'assets/images/blank-group-picture.png' %}" alt="Avatar Preview" id="avatarPreview">
+                        </div>
+                        <div class="avatar-upload">
+                            <label for="avatar" class="upload-label">
+                                <i class="fa fa-camera"></i> Chọn ảnh đại diện
+                            </label>
+                            <input type="file" id="avatar" name="avatar" class="file-input" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Tên nhóm</label>
+                    <input type="text" id="name" name="name" placeholder="Ví dụ: Nhóm Lập trình Web" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Mô tả nhóm</label>
+                    <textarea id="description" name="description" rows="6" 
+                        placeholder="Mô tả về mục đích, nội dung và hoạt động của nhóm" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="group_type">Loại nhóm</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="is_private" name="is_private">
+                        <label for="is_private">Nhóm riêng tư (Chỉ thành viên mới có thể xem nội dung)</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="create-group-button">Tạo nhóm</button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 UTESocial. All rights reserved.</p>
+            <ul>
+                <li><a href="#">Chính sách bảo mật</a></li>
+                <li><a href="#">Điều khoản sử dụng</a></li>
+                <li><a href="#">Liên hệ</a></li>
+            </ul>
+        </div>
+    </footer>
 
     <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
     <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
@@ -60,5 +128,42 @@
     <script src="{% static 'assets/js/simplebar.js' %}"></script>
     <script src="{% static 'assets/js/custom.js' %}"></script>
     <script src="{% static '../../unpkg.com/ionicons%405.2.3/dist/ionicons.js' %}"></script>
+
+    <script>
+        // Preview uploaded images
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(previewId).src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        document.getElementById('avatar').addEventListener('change', function() {
+            previewImage(this, 'avatarPreview');
+        });
+
+        document.getElementById('cover_photo').addEventListener('change', function() {
+            previewImage(this, 'coverPreview');
+        });
+
+        // Profile dropdown
+        const profileMenu = document.querySelector('.profile-menu');
+        profileMenu.addEventListener('click', (e) => {
+            const dropdown = profileMenu.querySelector('.profile-dropdown');
+            dropdown.classList.toggle('active');
+            e.stopPropagation();
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            const dropdown = document.querySelector('.profile-dropdown');
+            if (dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html> 

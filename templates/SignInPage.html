@@ -16,87 +16,49 @@
     <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/login_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 </head>
 
 <body class="bg-gray-100">
+    <header class="header">
+        <a href="" class="header-logo">UTE Social Media</a>
+        <a href="/signup" class="signup-button">Đăng ký</a>
+    </header>
 
+    <div class="login-container">
+        <div class="login-box">
+            <div class="logo-area">
+                <h1 class="logo">UTE Social Media</h1>
+                <p>Kết nối với bạn bè và thế giới xung quanh bạn.</p>
+            </div>
 
-    <div id="wrapper" class="flex flex-col justify-between h-screen">
+            {% if messages %}
+            <div class="error-message">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+            {% endif %}
 
-        <!-- header-->
-        <div class="bg-white py-4 shadow dark:bg-gray-800">
-            <div class="max-w-6xl mx-auto">
-
-
-                <div class="flex items-center lg:justify-between justify-around">
-
-                    <a href="trending.html">
-                       <b><h1 style="font-size: 1.5rem;">UTE Social Media</h1></b>
-                    </a>
-
-                    <div class="capitalize flex font-semibold hidden lg:block my-2 space-x-3 text-center text-sm">
-                        
-                        <a href="/signup" class="bg-pink-500 pink-500 px-6 py-3 rounded-md shadow text-white">Đăng ký</a>
-                    </div>
-
+            <form class="login-form" action="" method="POST">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="username" class="sr-only">Tên đăng nhập</label>
+                    <input type="text" id="username" name="username" placeholder="Tên đăng nhập" required>
                 </div>
-            </div>
-        </div>
-
-        <!-- Content-->
-        <div>
-            <div class="lg:p-12 max-w-md max-w-xl lg:my-0 my-12 mx-auto p-6 space-y-">
-                <h1 class="lg:text-3xl text-xl font-semibold  mb-6"> Đăng nhập</h1>
-
-
-                <div>
-                    <style>
-                        h5{
-                            color: red;
-                        }
-                    </style>
-                    {% for message in messages %}
-                    <h5>{{message}}</h5>
-                    {% endfor %}
+                <div class="input-group">
+                    <label for="password" class="sr-only">Mật khẩu</label>
+                    <input type="password" id="password" name="password" placeholder="Mật khẩu" required>
                 </div>
-
-
-                <form action="" method="POST">
-                    {% csrf_token %}
-                    <input type="text" name="username" placeholder="Username" class="bg-gray-200 mb-2 shadow-none dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
-                    <input type="password" name="password" placeholder="Password" class="bg-gray-200 mb-2 shadow-none dark:bg-gray-800" style="border: 1px solid #d3d5d8 !important;">
-                    <!-- <div class="flex justify-between my-4">
-                        <div class="checkbox">
-                            <input type="checkbox" id="chekcbox1" checked>
-                            <label for="chekcbox1"><span class="checkbox-icon"></span>Remember Me</label>
-                        </div>
-                        <a href="#"> Forgot Your Password? </a>
-                    </div> -->
-                    <button type="submit" class="bg-gradient-to-br from-pink-500 py-3 rounded-md text-white text-xl to-red-400 w-full">Login</button>
-                    <div class="text-center mt-5 space-x-2">
-                        <p class="text-base"> Chưa có tài khoản? <a href="/signup" class=""> Tạo tài khoản mới </a></p>
-                    </div>
-                </form>
-
-
-
-            </div>
+                <button type="submit" class="login-button">Đăng nhập</button>
+                <div class="divider"></div>
+                <a href="/signup" class="create-account-button">Tạo tài khoản mới</a>
+            </form>
         </div>
-        
-        <!-- Footer -->
-
-        <div class="lg:mb-5 py-3 uk-link-reset">
-            <div class="flex flex-col items-center justify-between lg:flex-row max-w-6xl mx-auto lg:space-y-0 space-y-3">
-                
-                <p class="capitalize"> DinhCongMinh - 21115053120334</p>
-            </div>
-        </div>
-
     </div>
 
-
-    
     <!-- Scripts
     ================================================== -->
     <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>

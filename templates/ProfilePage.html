@@ -2,185 +2,307 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
-
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
-	<title>Trang cá nhân - {{user_profile.user.username}}</title>
-   <!-- <link rel="icon" href="images/fav.png" type="image/png" sizes="16x16"> -->
-    
-    <link rel="stylesheet" href="{% static 'css/main.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/color.css' %}">
-    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
-
+    <title>Trang cá nhân - {{user_profile.user.username}}</title>
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/profile_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 <body>
+    <header class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="/">UTESocialMedia</a>
+            </div>
+            <div class="search-bar">
+                <form action="/search" method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="username" placeholder="Tìm kiếm người dùng...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
+                    <li><a href="{% url 'create_group' %}"><i class="fa fa-users"></i> Tạo nhóm</a></li>
+                    <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li class="profile-menu">
+                        <a href="#">
+                            <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="/profile/{{user_profile.user.username}}"><i class="fa fa-user"></i> Trang cá nhân</a></li>
+                                <li><a href="/settings"><i class="fa fa-cog"></i> Quản lý tài khoản</a></li>
+                                <li><a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-<div class="theme-layout">
-	
-	</div>
-	
-	<section>
-		<span style="color: white; font-size: 27px; margin-right: 520px;"><b><u><a href="/">Về trang chủ</a></u></b></span>
-			<div class="feature-photo">
-				<figure><img src="{% static 'images/resources/timeline-1.jpg' %}" alt=""></figure>
-				<form action="/follow" method="POST">
-					{% csrf_token %}
-					<div class="add-btn">
-					
-					{% if user_post_length == 0 %}
-					<span style="color: white; font-size: 27px;"><b>Không có bài đăng nào</b></span>
-					{% elif user_post_length == 1 %}
-					<span style="color: white; font-size: 27px;"><b>{{user_post_length}} Bài đăng</b></span>
-					{% else %}
-					<span style="color: white; font-size: 27px;"><b>{{user_post_length}} Các bài đăng</b></span>
-					{% endif %}
+    <main class="container profile-page-content">
+        <section class="profile-header">
+            <div class="cover-photo">
+                <img src="{{ user_profile.cover_photo.url }}" alt="Cover Photo">
+            </div>
+            <div class="profile-info-bar">
+                {% if user_profile.profileimg %}
+                    <img src="{{user_profile.profileimg.url}}" alt="Profile Picture" class="profile-picture">
+                {% else %}
+                    <img src="/media/profile_images/blank-profile-picture.png" alt="Default Profile Picture" class="profile-picture">
+                {% endif %}
+                <div class="user-details">
+                    <h1>@{{user_profile.user.username}}</h1>
+                    <div class="profile-stats">
+                        <span><span class="stat-number">{{user_followers}}</span> {% if user_followers == 1 %}Người theo dõi{% else %}Người theo dõi{% endif %}</span>
+                        <span><span class="stat-number">{{user_following}}</span> Đang theo dõi</span>
+                        <span><span class="stat-number">{{user_post_length}}</span> {% if user_post_length == 1 %}Bài đăng{% else %}Bài đăng{% endif %}</span>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    {% if user_object.username == user.username %}
+                        <a href="/settings" class="settings-button"><i class="fa fa-cog"></i> Quản lý tài khoản</a>
+                    {% else %}
+                        <form action="/follow" method="POST" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" value="{{user.username}}" name="follower" />
+                            <input type="hidden" value="{{user_object.username}}" name="user" />
+                            <button type="submit" class="follow-button">{{button_text}}</button>
+                        </form>
+                        <a href="/messages/?user_id={{user_object.id}}" class="message-button">
+                            <i class="fa fa-envelope"></i> Nhắn tin
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
 
-					{% if user_followers == 0 or user_followers == 1 %}
-					<span style="color: white; font-size: 27px;"><b>{{user_followers}} Người theo dõi</b></span>
-					{% else %}
-					<span style="color: white; font-size: 27px;"><b>{{user_followers}} người theo dõi</b></span>
-					{% endif %}
+        <div class="profile-main-content">
+            <aside class="sidebar-left">
+                <div class="card about-me">
+                    <h3>Thông tin</h3>
+                    <p>{{user_profile.bio}}</p>
+                    {% if user_profile.location %}
+                    <ul>
+                        <li><i class="fa fa-map-marker"></i> {{user_profile.location}}</li>
+                    </ul>
+                    {% endif %}
+                </div>
+            </aside>
 
+            <section class="profile-newsfeed">
+                {% for post in user_posts %}
+                <div class="post-card card">
+                    <div class="post-header">
+                        <div class="post-header-content">
+                            {% if user_profile.profileimg %}
+                                <img src="{{user_profile.profileimg.url}}" alt="User Avatar">
+                            {% else %}
+                                <img src="/media/profile_images/blank-profile-picture.png" alt="Default Profile Picture">
+                            {% endif %}
+                            <div>
+                                <h4>{{post.user}}</h4>
+                                <span class="timestamp">{{post.created_at|timesince}} ago</span>
+                            </div>
+                        </div>
+                        {% if post.user == request.user.username %}
+                        <div class="post-options">
+                            <button class="options-btn"><i class="fa fa-ellipsis-v"></i></button>
+                            <div class="options-dropdown">
+                                <ul>
+                                    <li><a href="#" class="edit-post-btn" data-post-id="{{post.id}}" data-post-caption="{{post.caption}}">
+                                        <i class="fa fa-edit"></i> Chỉnh sửa bài viết
+                                    </a></li>
+                                    <li><a href="#" class="delete-post-btn" data-post-id="{{post.id}}">
+                                        <i class="fa fa-trash"></i> Xóa bài viết
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% if post.caption %}
+                        <p id="post-content-{{post.id}}">{{post.caption}}</p>
+                    {% endif %}
+                    {% if post.image %}
+                        <img src="{{post.image.url}}" alt="Post Image" class="post-image">
+                    {% endif %}
+                    <div class="post-actions">
+                        <a href="/like-post?post_id={{post.id}}" class="like-btn">
+                            <span><i class="fa fa-thumbs-up"></i> {{post.no_of_likes}} Likes</span>
+                        </a>
+                        <span><i class="fa fa-comment"></i> Bình luận</span>
+                        <span><i class="fa fa-share"></i> Chia sẻ</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </section>
+        </div>
+    </main>
 
-					<span style="color: white; font-size: 27px;"><b>{{user_following}} Đang theo dõi</b></span>
+    <!-- Edit Post Modal -->
+    <div id="edit-post-modal" class="modal">
+        <div class="modal-content">
+            <form id="edit-post-form">
+                {% csrf_token %}
+                <h3>Chỉnh sửa bài viết</h3>
+                <textarea name="caption" id="edit-caption" placeholder="Nội dung bài viết..."></textarea>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-edit-btn">Hủy</button>
+                    <button type="submit" class="submit-btn">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-					<input type="hidden" value="{{user.username}}" name="follower" />
-					<input type="hidden" value="{{user_object.username}}" name="user" />
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3>Xác nhận xóa bài viết</h3>
+            <p>Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.</p>
+            <div class="modal-actions">
+                <button class="cancel-delete-btn">Hủy</button>
+                <button class="confirm-delete-btn">Xóa bài viết</button>
+            </div>
+        </div>
+    </div>
 
-					{% if user_object.username == user.username %}
-					<a href="/settings" data-ripple="">Quản lý tài khoản</a>
-					{% else %}
-					<a data-ripple=""><button type="submit" style="background-color: #ffc0cb; border: #ffc0cb;">{{button_text}}</button></a>
-					<a href="/messages/?user_id={{user_object.id}}" class="ml-2" style="background-color: #4CAF50; color: white; padding: 8px 15px; border-radius: 5px; text-decoration: none;">
-						<i class="fa fa-envelope"></i> Nhắn tin
-					</a>
-					{% endif %}
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 UTESocialMedia. All rights reserved.</p>
+        </div>
+    </footer>
 
-					</div>
-				</form>
+    <script>
+        // Profile dropdown
+        const profileMenu = document.querySelector('.profile-menu');
+        profileMenu.addEventListener('click', (e) => {
+            const dropdown = profileMenu.querySelector('.profile-dropdown');
+            dropdown.classList.toggle('active');
+            e.stopPropagation();
+        });
 
-				<div class="container-fluid">
-					<div class="row merged">
-						<div class="col-lg-2 col-sm-3">
-							<div class="user-avatar">
-								<figure>
-									{% if user_profile.profileimg %}
-										<img src="{{user_profile.profileimg.url}}" style="height: 250px; width: 100%;" alt="">
-									{% else %}
-										<img src="/media/profile_images/blank-profile-picture.png" style="height: 250px; width: 100%;" alt="Default Profile Picture">
-									{% endif %}
-									<!-- <form class="edit-phto">
-										<i class="fa fa-camera-retro"></i>
-										<label class="fileContainer">
-											<a href="#account-settings">Upload Profile Photo</a>
-										</label>
-									</form> -->
-								</figure>
-							</div>
-						</div>
-						<div class="col-lg-10 col-sm-9">
-							<div class="timeline-info">
-								<ul>
-									<li class="admin-name">
-									  <h5 style="color: black;white-space: nowrap; width: 110px; font-size: 27px;"><b>@{{user_profile.user.username}}</b><!--<i class="fa fa-check-circle" style="color: #48dbfb;" aria-hidden="true"></i>--></h5>
-									  <!--<span>Group Admin</span>-->
-									</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section><!-- top area -->
-		<section>
-			<div class="bio">
-					{{user_profile.bio}}
-			</div>
-		</section>
-		
-	<section>
-		<div class="gap gray-bg">
-			<div class="container-fluid">
-				<div class="row">
-					<div class="col-lg-12">
-						<div class="row" id="page-contents">
-							<div class="col-lg-3">
-								<aside class="sidebar static">
-									
-									
-									
-								</aside>
-							</div><!-- sidebar -->
-							
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            const dropdown = document.querySelector('.profile-dropdown');
+            if (dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+            }
+        });
 
+        // Modal handling for edit post
+        document.querySelectorAll('.edit-post-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const modal = document.getElementById('edit-post-modal');
+                const postId = button.dataset.postId;
+                const caption = button.dataset.postCaption;
+                document.getElementById('edit-caption').value = caption;
+                modal.style.display = 'block';
+                window.currentPostId = postId;
+            });
+        });
 
+        document.querySelector('.cancel-edit-btn').addEventListener('click', () => {
+            document.getElementById('edit-post-modal').style.display = 'none';
+        });
 
+        // Edit post form submission
+        document.getElementById('edit-post-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const postId = window.currentPostId;
+            const caption = document.getElementById('edit-caption').value;
 
+            try {
+                const response = await fetch(`/edit-post/${postId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({ caption })
+                });
 
+                if (response.ok) {
+                    document.getElementById(`post-content-${postId}`).textContent = caption;
+                    document.getElementById('edit-post-modal').style.display = 'none';
+                } else {
+                    alert('Có lỗi xảy ra khi cập nhật bài viết');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi cập nhật bài viết');
+            }
+        });
 
+        // Delete post handling
+        document.querySelectorAll('.delete-post-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                const modal = document.getElementById('delete-confirm-modal');
+                window.postToDelete = button.dataset.postId;
+                modal.style.display = 'block';
+            });
+        });
 
+        document.querySelector('.cancel-delete-btn').addEventListener('click', () => {
+            document.getElementById('delete-confirm-modal').style.display = 'none';
+        });
 
+        document.querySelector('.confirm-delete-btn').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/delete-post/${window.postToDelete}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
 
-							<div class="col-lg-6">
-								<div class="central-meta">
-									<ul class="photos">
-					
-										{% for post in user_posts %}
-										<li>
-											{% if post.image %}
-												<a class="strip" href="{{post.image.url}}" title="" data-strip-group="mygroup" data-strip-group-options="loop: false">
-													<img src="{{post.image.url}}" style="height: 250px; width: 300px;" alt="">
-												</a>
-											{% else %}
-												<div class="post-content" style="padding: 15px; background: #f8f9fa; margin-bottom: 15px; border-radius: 8px;">
-													<div class="post-header">
-														{% if post.user.profile.profileimg %}
-															<img src="{{ post.user.profile.profileimg.url }}" alt="user" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
-														{% else %}
-															<img src="/media/profile_images/blank-profile-picture.png" alt="Default Profile" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
-														{% endif %}
-														<span style="font-weight: bold;">{{ post.user.username }}</span>
-													</div>
-													<div class="post-text" style="margin-top: 10px;">
-														{{ post.caption }}
-													</div>
-													<div class="post-footer" style="margin-top: 10px; color: #666;">
-														<span>{{ post.created_at|date:"d/m/Y H:i" }}</span>
-													</div>
-												</div>
-											{% endif %}
-										</li>
-										{% endfor %}
-										
-										
-										
-									</ul>
-									<!--<div class="lodmore"><button class="btn-view btn-load-more"></button></div>-->
-								</div><!-- photos -->
-							</div><!-- centerl meta -->
-							<div class="col-lg-3">
-								<aside class="sidebar static">
-									
-								</aside>
-							</div><!-- sidebar -->
-						</div>	
-					</div>
-				</div>
-			</div>
-		</div>	
-	</section>
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    alert('Có lỗi xảy ra khi xóa bài viết');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xóa bài viết');
+            }
+        });
 
-	
-	
-	<script data-cfasync="false" src="{% static '../../cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js' %}"></script><script src="{% static 'js/main.min.js' %}"></script>
-	<script src="{% static 'js/script.js' %}"></script>
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            const editModal = document.getElementById('edit-post-modal');
+            const deleteModal = document.getElementById('delete-confirm-modal');
+            if (e.target === editModal) {
+                editModal.style.display = 'none';
+            }
+            if (e.target === deleteModal) {
+                deleteModal.style.display = 'none';
+            }
+        });
 
-</body>	
+        // Post options dropdown
+        document.querySelectorAll('.options-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = button.nextElementSibling;
+                dropdown.classList.toggle('active');
+            });
+        });
 
-
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.options-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('active');
+            });
+        });
+    </script>
+</body>
 </html>

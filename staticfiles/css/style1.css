@@ -1,0 +1,209 @@
+/* PHONG CÁCH 1: Hiện đại, đơn giản giống Facebook/Twitter */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #1c1e21;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  
+  .header .left, .header .center, .header .right {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 10px;
+    color: #1877f2;
+  }
+  
+  .search-bar {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+  }
+  
+  .nav-btn {
+    background: none;
+    border: none;
+    margin: 0 10px;
+    font-size: 16px;
+    cursor: pointer;
+    color: #333;
+  }
+  
+  .icon {
+    font-size: 20px;
+    margin: 0 10px;
+    cursor: pointer;
+  }
+  
+  .profile-dropdown {
+    position: relative;
+  }
+  
+  .profile-icon {
+    cursor: pointer;
+  }
+  
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 10px;
+    min-width: 150px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    z-index: 1001;
+  }
+  
+  .profile-dropdown:hover .dropdown-menu {
+    display: block;
+  }
+  
+  .dropdown-menu a {
+    display: block;
+    padding: 10px;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .dropdown-menu a:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .main {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .content {
+    flex: 0 0 45%;
+  }
+  
+  .new-post {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  
+  .new-post textarea {
+    width: 100%;
+    resize: none;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    min-height: 80px;
+    margin-bottom: 10px;
+  }
+  
+  .post-tools span {
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+  
+  .newsfeed .post {
+    background: white;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  
+  .sidebar {
+    flex: 0 0 25%;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    height: fit-content;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  }
+  
+  .sidebar .suggestion {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .footer {
+    background: #fff;
+    text-align: center;
+    padding: 15px;
+    border-top: 1px solid #ddd;
+    margin-top: auto;
+  }
+  
+  /* PHONG CÁCH 2: Tươi sáng, sinh viên, mang màu sắc trường học */
+  body.student-theme {
+    background-color: #e8f4f8;
+    font-family: "Segoe UI", sans-serif;
+  }
+  
+  .student-theme .header {
+    background-color: #004d99;
+    color: white;
+  }
+  
+  .student-theme .logo {
+    color: #ffcc00;
+  }
+  
+  .student-theme .search-bar {
+    border-radius: 10px;
+    border: none;
+    padding: 8px;
+  }
+  
+  .student-theme .nav-btn {
+    color: #fff;
+    font-weight: bold;
+  }
+  
+  .student-theme .icon,
+  .student-theme .profile-icon {
+    color: #ffcc00;
+  }
+  
+  .student-theme .dropdown-menu {
+    background-color: #ffffff;
+    border-color: #004d99;
+  }
+  
+  .student-theme .main {
+    background-color: #f2fbff;
+  }
+  
+  .student-theme .new-post, .student-theme .newsfeed .post, .student-theme .sidebar {
+    background-color: #ffffff;
+    border-left: 4px solid #007acc;
+  }
+  
+  .student-theme .footer {
+    background-color: #004d99;
+    color: #fff;
+    border-top: none;
+  }
+  

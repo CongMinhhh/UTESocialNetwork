@@ -3,11 +3,12 @@ from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost, FollowersCount, Group, Message
+from .models import Profile, Post, LikePost, FollowersCount, Group, Message, Product, ProductImage
 from itertools import chain
 import random
 from django.db import models
 from django.db.models import Q
+from django.contrib.auth.hashers import check_password
 
 # Create your views here.
 
@@ -15,6 +16,10 @@ from django.db.models import Q
 def index(request):
     user_object = User.objects.get(username=request.user.username)
     user_profile = Profile.objects.get(user=user_object)
+
+    # Get follower and following counts
+    user_followers = len(FollowersCount.objects.filter(user=request.user.username))
+    user_following_count = len(FollowersCount.objects.filter(follower=request.user.username))
 
     user_following_list = []
     feed = []
@@ -37,7 +42,20 @@ def index(request):
     # Sắp xếp lại theo thời gian tạo
     feed_list.sort(key=lambda x: x.created_at, reverse=True)
 
-    # user suggestion starts
+    # Get all unique usernames from posts
+    post_usernames = set(post.user for post in feed_list)
+    
+    # Get profiles for all users who have posts
+    profiles = {}
+    for username in post_usernames:
+        try:
+            user = User.objects.get(username=username)
+            profile = Profile.objects.get(user=user)
+            profiles[username] = profile
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            continue
+
+    # User suggestions
     all_users = User.objects.all()
     user_following_all = []
 
@@ -47,13 +65,13 @@ def index(request):
     
     new_suggestions_list = [x for x in list(all_users) if (x not in list(user_following_all))]
     current_user = User.objects.filter(username=request.user.username)
-    final_suggestions_list = [x for x in list(new_suggestions_list) if ( x not in list(current_user))]
+    final_suggestions_list = [x for x in list(new_suggestions_list) if (x not in list(current_user))]
     random.shuffle(final_suggestions_list)
 
     username_profile = []
     username_profile_list = []
 
-    for users in final_suggestions_list:
+    for users in final_suggestions_list[:5]:  # Limit to 5 user suggestions
         username_profile.append(users.id)
 
     for ids in username_profile:
@@ -61,11 +79,18 @@ def index(request):
         username_profile_list.append(profile_lists)
 
     suggestions_username_profile_list = list(chain(*username_profile_list))
+    
+    # Group suggestions
+    all_groups = Group.objects.all().order_by('?')[:5]  # Get 5 random groups
 
     return render(request, 'MainPage.html', {
         'user_profile': user_profile, 
         'posts': feed_list, 
-        'suggestions_username_profile_list': suggestions_username_profile_list[:4]
+        'profiles': profiles,
+        'suggestions_username_profile_list': suggestions_username_profile_list,
+        'suggested_groups': all_groups,
+        'user_followers': user_followers,
+        'user_following': user_following_count
     })
 
 @login_required(login_url='signin')
@@ -148,7 +173,7 @@ def like_post(request):
 def profile(request, pk):
     user_object = User.objects.get(username=pk)
     user_profile = Profile.objects.get(user=user_object)
-    user_posts = Post.objects.filter(user=pk)
+    user_posts = Post.objects.filter(user=pk).order_by('-created_at')  # Sort by creation time in descending order
     user_post_length = len(user_posts)
 
     follower = request.user.username
@@ -193,30 +218,52 @@ def follow(request):
 @login_required(login_url='signin')
 def settings(request):
     user_profile = Profile.objects.get(user=request.user)
+    
+    # Get following users (friends)
+    following = FollowersCount.objects.filter(follower=request.user.username)
+    following_users = []
+    for follow in following:
+        try:
+            user = User.objects.get(username=follow.user)
+            profile = Profile.objects.get(user=user)
+            following_users.append({
+                'user': user,
+                'profile': profile
+            })
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            continue
+            
+    # Get groups user is a member of
+    user_groups = Group.objects.filter(members__user=request.user)
 
     if request.method == 'POST':
-        
+        # Handle profile image upload
         if request.FILES.get('image') == None:
             image = user_profile.profileimg
-            bio = request.POST['bio']
-            location = request.POST['location']
-
-            user_profile.profileimg = image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
-        if request.FILES.get('image') != None:
+        else:
             image = request.FILES.get('image')
-            bio = request.POST['bio']
-            location = request.POST['location']
+            
+        # Handle cover photo upload
+        if request.FILES.get('cover_photo') == None:
+            cover_photo = user_profile.cover_photo
+        else:
+            cover_photo = request.FILES.get('cover_photo')
+            
+        bio = request.POST['bio']
+        location = request.POST['location']
 
-            user_profile.profileimg = image
-            user_profile.bio = bio
-            user_profile.location = location
-            user_profile.save()
+        user_profile.profileimg = image
+        user_profile.cover_photo = cover_photo
+        user_profile.bio = bio
+        user_profile.location = location
+        user_profile.save()
         
         return redirect('settings')
-    return render(request, 'SettingPage.html', {'user_profile': user_profile})
+    return render(request, 'SettingPage.html', {
+        'user_profile': user_profile,
+        'following_users': following_users,
+        'user_groups': user_groups
+    })
 
 def signup(request):
 
@@ -278,6 +325,9 @@ def logout(request):
 
 @login_required(login_url='signin')
 def messages_page(request):
+    # Get current user's profile
+    user_profile = Profile.objects.get(user=request.user)
+    
     # Get all conversations of the current user
     conversations = Message.objects.filter(
         Q(sender=request.user) | Q(receiver=request.user)
@@ -293,10 +343,23 @@ def messages_page(request):
     
     chat_users = User.objects.filter(id__in=users_with_conversations)
     
+    # Get profiles for all chat users
+    chat_users_with_profiles = []
+    for user in chat_users:
+        try:
+            profile = Profile.objects.get(user=user)
+            chat_users_with_profiles.append({
+                'user': user,
+                'profile': profile
+            })
+        except Profile.DoesNotExist:
+            continue
+    
     # If a specific chat is selected
     selected_user_id = request.GET.get('user_id')
     if selected_user_id:
         selected_user = User.objects.get(id=selected_user_id)
+        selected_user_profile = Profile.objects.get(user=selected_user)
         messages = Message.objects.filter(
             (Q(sender=request.user) & Q(receiver=selected_user)) |
             (Q(sender=selected_user) & Q(receiver=request.user))
@@ -307,11 +370,14 @@ def messages_page(request):
         unread_messages.update(is_read=True)
     else:
         selected_user = None
+        selected_user_profile = None
         messages = []
     
     context = {
-        'chat_users': chat_users,
+        'user_profile': user_profile,
+        'chat_users': chat_users_with_profiles,
         'selected_user': selected_user,
+        'selected_user_profile': selected_user_profile,
         'messages': messages,
     }
     
@@ -363,3 +429,234 @@ def get_messages(request, user_id):
         return JsonResponse({'status': 'success', 'messages': messages_data})
     except User.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'User not found'})
+
+@login_required(login_url='signin')
+def edit_post(request, post_id):
+    if request.method == 'POST':
+        try:
+            post = Post.objects.get(id=post_id)
+            
+            # Check if the user owns the post
+            if post.user != request.user.username:
+                return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
+            
+            import json
+            data = json.loads(request.body)
+            caption = data.get('caption')
+            
+            if caption is not None:
+                post.caption = caption
+                post.save()
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Caption is required'}, status=400)
+                
+        except Post.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Post not found'}, status=404)
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+@login_required(login_url='signin')
+def delete_post(request, post_id):
+    if request.method == 'POST':
+        try:
+            post = Post.objects.get(id=post_id)
+            
+            # Check if the user owns the post
+            if post.user != request.user.username:
+                return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
+            
+            # Delete the post
+            post.delete()
+            return JsonResponse({'status': 'success'})
+                
+        except Post.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Post not found'}, status=404)
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+@login_required(login_url='signin')
+def change_password(request):
+    if request.method == 'POST':
+        current_password = request.POST['current_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+        
+        user = request.user
+        
+        # Check if current password is correct
+        if not check_password(current_password, user.password):
+            messages.error(request, 'Mật khẩu hiện tại không chính xác')
+            return redirect('settings')
+        
+        # Check if new password is same as current password
+        if check_password(new_password, user.password):
+            messages.error(request, 'Mật khẩu mới không được trùng với mật khẩu hiện tại')
+            return redirect('settings')
+            
+        # Check if new passwords match
+        if new_password != confirm_password:
+            messages.error(request, 'Mật khẩu mới và xác nhận mật khẩu không khớp')
+            return redirect('settings')
+            
+        # Check password length
+        if len(new_password) < 8:
+            messages.error(request, 'Mật khẩu phải có ít nhất 8 ký tự')
+            return redirect('settings')
+            
+        # Update password
+        user.set_password(new_password)
+        user.save()
+        
+        # Re-authenticate user
+        updated_user = auth.authenticate(username=user.username, password=new_password)
+        auth.login(request, updated_user)
+        
+        messages.success(request, 'Mật khẩu đã được cập nhật thành công')
+        return redirect('settings')
+        
+    return redirect('settings')
+
+@login_required(login_url='signin')
+def marketplace(request):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+
+    # Get filter parameters
+    category = request.GET.get('category')
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
+    # Base queryset
+    products = Product.objects.filter(is_sold=False)
+
+    # Apply filters
+    if category and category != 'all':
+        products = products.filter(category=category)
+    if min_price:
+        products = products.filter(price__gte=min_price)
+    if max_price:
+        products = products.filter(price__lte=max_price)
+
+    context = {
+        'user_profile': user_profile,
+        'products': products,
+        'category': category,
+        'min_price': min_price,
+        'max_price': max_price,
+    }
+
+    return render(request, 'MarketPlace.html', context)
+
+@login_required(login_url='signin')
+def create_listing(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        price = request.POST.get('price')
+        category = request.POST.get('category')
+        location = request.POST.get('location')
+        images = request.FILES.getlist('images')
+
+        # Create product
+        product = Product.objects.create(
+            seller=request.user,
+            title=title,
+            description=description,
+            price=price,
+            category=category,
+            location=location
+        )
+
+        # Create product images
+        for image in images:
+            ProductImage.objects.create(
+                product=product,
+                image=image
+            )
+
+        messages.success(request, 'Sản phẩm đã được đăng thành công!')
+        return redirect('marketplace')
+
+    return redirect('marketplace')
+
+@login_required(login_url='signin')
+def edit_product(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id, seller=request.user)
+    except Product.DoesNotExist:
+        messages.error(request, 'Không tìm thấy sản phẩm!')
+        return redirect('marketplace')
+
+    if request.method == 'POST':
+        product.title = request.POST.get('title')
+        product.description = request.POST.get('description')
+        product.price = request.POST.get('price')
+        product.category = request.POST.get('category')
+        product.location = request.POST.get('location')
+        product.save()
+
+        # Handle new images
+        new_images = request.FILES.getlist('images')
+        for image in new_images:
+            ProductImage.objects.create(
+                product=product,
+                image=image
+            )
+
+        messages.success(request, 'Sản phẩm đã được cập nhật thành công!')
+        return redirect('marketplace')
+
+    return redirect('marketplace')
+
+@login_required(login_url='signin')
+def delete_product(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id, seller=request.user)
+        product.delete()
+        messages.success(request, 'Sản phẩm đã được xóa thành công!')
+    except Product.DoesNotExist:
+        messages.error(request, 'Không tìm thấy sản phẩm!')
+
+    return redirect('marketplace')
+
+@login_required(login_url='signin')
+def product_detail(request, product_id):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    
+    try:
+        product = Product.objects.get(id=product_id)
+        seller_profile = Profile.objects.get(user=product.seller)
+        
+        context = {
+            'user_profile': user_profile,
+            'product': product,
+            'seller_profile': seller_profile,
+        }
+        return render(request, 'ProductDetail.html', context)
+    except Product.DoesNotExist:
+        return redirect('marketplace')
+
+@login_required(login_url='signin')
+def search_market(request):
+    if request.method == 'POST':
+        query = request.POST.get('search_query', '')
+        user_profile = Profile.objects.get(user=request.user)
+
+        products = Product.objects.filter(
+            models.Q(title__icontains=query) |
+            models.Q(description__icontains=query) |
+            models.Q(category__icontains=query) |
+            models.Q(location__icontains=query),
+            is_sold=False
+        )
+
+        context = {
+            'user_profile': user_profile,
+            'products': products,
+            'search_query': query,
+        }
+        return render(request, 'MarketPlace.html', context)
+
+    return redirect('marketplace')

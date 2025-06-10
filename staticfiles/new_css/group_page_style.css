@@ -1,0 +1,665 @@
+/* General Body Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: #f0f2f5; /* Light grey background */
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navbar (reused from previous examples) */
+.navbar {
+    background-color: #ffffff;
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4a90e2; /* Blue accent */
+}
+
+.navbar nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.navbar nav ul li {
+    margin-right: 25px;
+}
+
+.navbar nav ul li a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar nav ul li a:hover {
+    color: #4a90e2;
+}
+
+.search-bar input {
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 20px;
+    outline: none;
+    font-size: 14px;
+    width: 200px;
+}
+
+/* --- Group Page Specific Styles --- */
+
+.group-page-content {
+    padding-top: 30px;
+}
+
+/* Group Header Section */
+.group-header {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    overflow: hidden; /* Ensures border-radius applies to cover photo */
+}
+
+.group-cover-photo {
+    width: 100%;
+    height: 280px; /* Fixed height for cover photo */
+    overflow: hidden;
+    background-color: #eee; /* Placeholder background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.group-cover-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures image covers the area */
+    display: block;
+}
+
+.group-info-bar {
+    display: flex;
+    align-items: flex-end; /* Align items to the bottom */
+    padding: 0 40px 20px 40px; /* Adjust padding around elements */
+    position: relative;
+    margin-top: -60px; /* Pull group icon up over cover photo */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.group-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px; /* Slightly rounded corners for icon */
+    border: 4px solid #fff; /* White border around icon */
+    object-fit: cover;
+    margin-right: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.group-details {
+    flex-grow: 1; /* Allows it to take up available space */
+    text-align: left;
+    margin-right: 20px; /* Space before actions */
+}
+
+.group-details h1 {
+    margin: 0;
+    font-size: 30px;
+    color: #333;
+    line-height: 1.2;
+}
+
+.group-details .group-tagline {
+    font-size: 15px;
+    color: #777;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.group-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #555;
+    font-weight: 500;
+}
+
+.group-stats .stat-number {
+    font-weight: 700;
+    color: #333;
+}
+
+.group-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px; /* Align buttons nicely at the bottom */
+    flex-wrap: wrap;
+}
+
+.group-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.join-group-button {
+    background-color: #28a745; /* Green for join */
+    color: #fff;
+}
+
+.join-group-button:hover {
+    background-color: #218838;
+    transform: translateY(-1px);
+}
+
+.invite-button {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.invite-button:hover {
+    background-color: #d0d0d0;
+    transform: translateY(-1px);
+}
+
+.more-options {
+    background-color: #e0e0e0;
+    color: #333;
+    padding: 10px 15px; /* Smaller padding for '...' button */
+}
+
+.more-options:hover {
+    background-color: #d0d0d0;
+    transform: translateY(-1px);
+}
+
+
+/* Group Navigation (Tabs) */
+.group-nav {
+    display: flex;
+    gap: 15px;
+    margin: 0 40px; /* Indent to align with group info */
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 5px;
+    margin-top: 15px; /* Space from group info bar */
+}
+
+.group-nav-link {
+    background-color: transparent;
+    border: none;
+    padding: 10px 0px; /* No horizontal padding, just vertical */
+    font-size: 16px;
+    font-weight: 600;
+    color: #777;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.group-nav-link:hover:not(.active) {
+    color: #4a90e2;
+}
+
+.group-nav-link.active {
+    color: #4a90e2;
+}
+
+.group-nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -7px; /* Align with border-bottom */
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: #4a90e2;
+    border-radius: 2px 2px 0 0;
+}
+
+/* Main Content Area (for sections) */
+.group-main-content {
+    padding: 30px 0;
+}
+
+.group-section {
+    display: none; /* Hidden by default, shown by JS */
+}
+
+.group-section.active-section {
+    display: block;
+}
+
+.group-section h3 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #333;
+    font-size: 24px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+/* Card General Style (reused and slightly modified) */
+.card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+/* Create Post Area (reused from main newsfeed) */
+.create-post textarea {
+    width: calc(100% - 20px);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    resize: vertical;
+    min-height: 80px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    margin-bottom: 10px;
+    outline: none;
+}
+
+.create-post button {
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.create-post button:hover {
+    background-color: #3a7bd2;
+}
+
+
+/* Post Card (reused from main newsfeed) */
+.post-card .post-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.post-card .post-header img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+    border: 2px solid #eee;
+}
+
+.post-card .post-header h4 {
+    margin: 0;
+    color: #333;
+}
+
+.post-card .post-header .timestamp {
+    font-size: 13px;
+    color: #888;
+}
+
+.post-card p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.post-card .post-image {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: block;
+    height: auto;
+}
+
+.post-card .post-actions {
+    display: flex;
+    justify-content: space-around;
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.post-card .post-actions span {
+    color: #555;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.post-card .post-actions span:hover {
+    color: #4a90e2;
+}
+
+/* About Content */
+.about-content p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.about-content ul {
+    list-style: disc;
+    margin-left: 20px;
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.about-content ul li {
+    margin-bottom: 8px;
+}
+
+/* Member List Grid */
+.member-list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.member-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fcfcfc;
+}
+
+.member-item img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.member-item span {
+    flex-grow: 1;
+    font-weight: 500;
+    color: #333;
+}
+
+.member-item small {
+    color: #777;
+    margin-left: 5px;
+}
+
+.member-item .profile-button {
+    background-color: #e0f2f7;
+    color: #4a90e2;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.member-item .profile-button:hover {
+    background-color: #c0e1eb;
+}
+
+/* Photo Gallery Grid */
+.photo-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.photo-gallery-grid img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.photo-gallery-grid img:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Footer (reused from previous examples) */
+.footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 30px;
+}
+
+.footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.footer ul li {
+    margin-left: 20px;
+}
+
+.footer ul li a {
+    text-decoration: none;
+    color: #ccc;
+    transition: color 0.3s ease;
+}
+
+.footer ul li a:hover {
+    color: #fff;
+}
+
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .group-info-bar {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 0 20px 20px 20px;
+        margin-top: -50px; /* Adjust for smaller group icon */
+    }
+
+    .group-icon {
+        width: 100px;
+        height: 100px;
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+
+    .group-details {
+        text-align: center;
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .group-details h1 {
+        font-size: 28px;
+    }
+
+    .group-stats {
+        justify-content: center;
+    }
+
+    .group-actions {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .group-nav {
+        margin: 15px 20px; /* Adjust margin for smaller screens */
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .group-nav-link {
+        margin-bottom: 10px; /* Add some spacing for wrapped links */
+    }
+
+    .member-list-grid,
+    .photo-gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar .container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .navbar nav ul {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .navbar nav ul li {
+        margin: 0 10px 10px 10px;
+    }
+
+    .search-bar {
+        margin-top: 10px;
+    }
+
+    .group-cover-photo {
+        height: 180px; /* Shorter cover photo on smaller screens */
+    }
+
+    .group-header {
+        padding-bottom: 0;
+    }
+
+    .footer .container {
+        flex-direction: column;
+    }
+
+    .footer ul {
+        margin-top: 10px;
+    }
+
+    .footer ul li {
+        margin: 0 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar .logo {
+        font-size: 20px;
+    }
+
+    .navbar nav ul li {
+        margin: 0 5px 10px 5px;
+    }
+
+    .search-bar input {
+        width: 150px;
+    }
+
+    .group-icon {
+        width: 80px;
+        height: 80px;
+        border-width: 3px;
+    }
+
+    .group-details h1 {
+        font-size: 24px;
+    }
+
+    .group-details .group-tagline {
+        font-size: 13px;
+    }
+
+    .group-stats {
+        flex-direction: column;
+        gap: 5px;
+        font-size: 13px;
+    }
+
+    .group-actions button {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    .group-nav-link {
+        font-size: 14px;
+        padding: 8px 0;
+    }
+
+    .group-section h3 {
+        font-size: 20px;
+    }
+
+    .create-post textarea {
+        min-height: 60px;
+    }
+
+    .post-card .post-header img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .member-list-grid {
+        grid-template-columns: 1fr; /* Single column for members on very small screens */
+    }
+
+    .member-item img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .member-item span {
+        font-size: 15px;
+    }
+
+    .member-item .profile-button {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+
+    .photo-gallery-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 5px;
+    }
+
+    .photo-gallery-grid img {
+        height: 100px;
+    }
+}

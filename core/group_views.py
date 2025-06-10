@@ -6,13 +6,18 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
+from .models import Profile
 
 @login_required
 def create_group(request):
+    user_profile = Profile.objects.get(user=request.user)
+    
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description')
         is_private = request.POST.get('is_private', False)
+        avatar = request.FILES.get('avatar')
+        cover_photo = request.FILES.get('cover_photo')
 
         if Group.objects.filter(name=name).exists():
             messages.error(request, 'Tên nhóm đã tồn tại')
@@ -25,6 +30,16 @@ def create_group(request):
             is_private=is_private == 'true'
         )
 
+        # Handle avatar upload
+        if avatar:
+            group.profile_image = avatar
+            
+        # Handle cover photo upload
+        if cover_photo:
+            group.cover_photo = cover_photo
+            
+        group.save()
+
         GroupMember.objects.create(
             group=group,
             user=request.user
@@ -33,7 +48,7 @@ def create_group(request):
         messages.success(request, 'Tạo nhóm thành công!')
         return redirect('group_detail', group_id=group.id)
 
-    return render(request, 'create_group.html')
+    return render(request, 'create_group.html', {'user_profile': user_profile})
 
 @login_required
 def group_detail(request, group_id):

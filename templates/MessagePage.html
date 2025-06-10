@@ -14,131 +14,148 @@
     <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/messages_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
-    <header>
-        <div class="header_inner">
-            <div class="left-side">
-                <div id="logo" style="margin-right: 10px;">
-                    <a href="/">
-                        <b style="font-weight: bold;"><h1>UTE Social Network</h1></b>
-                    </a>
-                </div>
+    <header class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="/">UTESocialMedia</a>
             </div>
-            <div class="right-side lg:pr-4">
-                <a href="#">
-                    {% if request.user.profile.profileimg %}
-                        <img src="{{ request.user.profile.profileimg.url }}" class="header-avatar" alt="">
-                    {% else %}
-                        <img src="/media/profile_images/blank-profile-picture.png" class="header-avatar" alt="">
-                    {% endif %}
-                </a>
-                <div uk-drop="mode: click;offset:9" class="header_dropdown profile_dropdown border-t">
-                    <ul>
-                        <li><a href="/settings"> Quản lý tài khoản </a></li>
-                        <li><a href="/profile/{{request.user.username}}"> Trang cá nhân </a></li>
-                        <li><a href="/logout"> Đăng xuất</a></li>
-                    </ul>
-                </div>
+            <div class="search-bar">
+                <form action="/search" method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="username" placeholder="Tìm kiếm người dùng...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
             </div>
+            <nav>
+                <ul>
+                    <li><a href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
+                    <li><a href="{% url 'create_group' %}"><i class="fa fa-users"></i> Tạo nhóm</a></li>
+                    <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li class="profile-menu">
+                        <a href="#">
+                            <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="/profile/{{user_profile.user.username}}"><i class="fa fa-user"></i> Trang cá nhân</a></li>
+                                <li><a href="/settings"><i class="fa fa-cog"></i> Quản lý tài khoản</a></li>
+                                <li><a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </header>
 
-    <div class="container m-auto flex gap-x-6">
-        <!-- left sidebar-->
-        <div class="space-y-5 flex-shrink-0 lg:w-4/12 mr-4"> 
-            <div class="bg-white shadow-md rounded-md overflow-hidden">
-                <!-- Tiêu đề -->
-                <div class="bg-gray-50 border-b border-gray-100 flex items-baseline justify-between py-4 px-6">
-                    <h2 class="font-semibold text-lg">Tin nhắn</h2>
+    <main class="container messages-page-content">
+        <div class="messaging-container">
+            <aside class="contact-list-sidebar">
+                <div class="sidebar-header">
+                    <h3>Tin nhắn</h3>
                 </div>
-        
-                <!-- Danh sách tin nhắn -->
-                <div class="divide-y divide-gray-100 px-4" id="chat-list">
-                    {% for user in chat_users %}
-                    <div class="flex items-start space-x-4 py-4 chat-user" data-user-id="{{ user.id }}">
-                        {% if user.profile.profileimg %}
-                            <img src="{{ user.profile.profileimg.url }}" class="w-10 h-10 rounded-full object-cover" alt="Avatar">
+                <div class="search-chats">
+                    <input type="text" placeholder="Tìm kiếm tin nhắn...">
+                </div>
+                <ul class="contacts">
+                    {% for chat_user in chat_users %}
+                    <li class="contact-item {% if selected_user.id == chat_user.user.id %}active{% endif %}" data-user-id="{{ chat_user.user.id }}">
+                        {% if chat_user.profile.profileimg %}
+                            <img src="{{ chat_user.profile.profileimg.url }}" alt="{{ chat_user.user.username }}">
                         {% else %}
-                            <img src="/media/profile_images/blank-profile-picture.png" class="w-10 h-10 rounded-full object-cover" alt="Avatar">
+                            <img src="/media/profile_images/blank-profile-picture.png" alt="{{ chat_user.user.username }}">
                         {% endif %}
-                        <div class="flex-1">
-                            <span class="block font-semibold text-gray-800">{{ user.username }}</span>
-                            <p class="text-sm text-gray-600 last-message"></p>
+                        <div class="contact-info">
+                            <h4>{{ chat_user.user.username }}</h4>
+                            <p class="last-message"></p>
                         </div>
-                    </div>
+                    </li>
                     {% endfor %}
-                </div>
-            </div>
-        </div>
+                </ul>
+            </aside>
 
-        <!-- right sidebar-->
-        <div class="lg:w-8/12">
-            <div class="bg-white shadow-md rounded-md overflow-hidden">
+            <section class="message-display-area">
                 {% if selected_user %}
-                <!-- Tiêu đề -->
-                <div class="bg-gray-50 border-b border-gray-100 flex items-center justify-between py-4 px-6">
-                    <h2 class="font-semibold text-lg">Tin nhắn với {{ selected_user.username }}</h2>
+                <div class="chat-header">
+                    {% if selected_user_profile.profileimg %}
+                        <img src="{{ selected_user_profile.profileimg.url }}" alt="{{ selected_user.username }}">
+                    {% else %}
+                        <img src="/media/profile_images/blank-profile-picture.png" alt="{{ selected_user.username }}">
+                    {% endif %}
+                    <h4>{{ selected_user.username }}</h4>
                 </div>
-            
-                <!-- Khung cuộn chứa tin nhắn -->
-                <div class="max-h-[500px] overflow-y-scroll px-6 py-4 space-y-4" id="messages-container">
+
+                <div class="messages-box" id="messages-container">
                     {% for message in messages %}
                         {% if message.sender == request.user %}
-                            <div class="flex items-start justify-end space-x-3">
-                                <div class="bg-blue-600 text-white px-4 py-2 rounded-lg max-w-[75%]">
-                                    <p class="text-sm">{{ message.content }}</p>
-                                    <span class="text-xs text-gray-300">{{ message.created_at|time:"H:i" }}</span>
+                            <div class="message sent">
+                                <img src="{{ user_profile.profileimg.url }}" alt="Avatar của bạn">
+                                <div class="message-content">
+                                    <p>{{ message.content }}</p>
+                                    <span class="timestamp">{{ message.created_at|time:"H:i" }}</span>
                                 </div>
-                                {% if request.user.profile.profileimg %}
-                                    <img src="{{ request.user.profile.profileimg.url }}" class="w-9 h-9 rounded-full object-cover" alt="Avatar của bạn">
-                                {% else %}
-                                    <img src="/media/profile_images/blank-profile-picture.png" class="w-9 h-9 rounded-full object-cover" alt="Avatar của bạn">
-                                {% endif %}
                             </div>
                         {% else %}
-                            <div class="flex items-start space-x-3">
-                                {% if message.sender.profile.profileimg %}
-                                    <img src="{{ message.sender.profile.profileimg.url }}" class="w-9 h-9 rounded-full object-cover" alt="Avatar">
+                            <div class="message received">
+                                {% if selected_user_profile.profileimg %}
+                                    <img src="{{ selected_user_profile.profileimg.url }}" alt="Avatar">
                                 {% else %}
-                                    <img src="/media/profile_images/blank-profile-picture.png" class="w-9 h-9 rounded-full object-cover" alt="Avatar">
+                                    <img src="/media/profile_images/blank-profile-picture.png" alt="Avatar">
                                 {% endif %}
-                                <div class="bg-gray-100 px-4 py-2 rounded-lg max-w-[75%]">
-                                    <p class="text-sm text-gray-800">{{ message.content }}</p>
-                                    <span class="text-xs text-gray-500">{{ message.created_at|time:"H:i" }}</span>
+                                <div class="message-content">
+                                    <p>{{ message.content }}</p>
+                                    <span class="timestamp">{{ message.created_at|time:"H:i" }}</span>
                                 </div>
                             </div>
                         {% endif %}
                     {% endfor %}
                 </div>
-            
-                <!-- Khung nhập tin nhắn -->
-                <div class="border-t border-gray-100 px-4 py-3">
+
+                <div class="message-input-area">
                     <form id="message-form" data-receiver-id="{{ selected_user.id }}">
                         {% csrf_token %}
-                        <div class="flex items-center space-x-3">
-                            <input type="text" id="message-input" placeholder="Nhập tin nhắn..." 
-                                   class="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm">
-                            <button type="submit" class="bg-blue-600 text-white rounded-full px-4 py-2 text-sm hover:bg-blue-700">Gửi</button>
-                        </div>
+                        <input type="text" id="message-input" class="message-input" placeholder="Nhập tin nhắn...">
+                        <button type="submit" class="send-button"><i class="fa fa-paper-plane"></i></button>
                     </form>
                 </div>
                 {% else %}
-                <div class="p-6 text-center text-gray-500">
-                    Chọn một người dùng để bắt đầu cuộc trò chuyện
+                <div class="empty-state">
+                    <p>Chọn một người dùng để bắt đầu cuộc trò chuyện</p>
                 </div>
                 {% endif %}
-            </div>
+            </section>
         </div>
-    </div>
+    </main>
 
-    <!-- Scripts -->
     <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
     <script>
         $(document).ready(function() {
+            // Profile dropdown
+            const profileMenu = document.querySelector('.profile-menu');
+            profileMenu.addEventListener('click', (e) => {
+                const dropdown = profileMenu.querySelector('.profile-dropdown');
+                dropdown.classList.toggle('active');
+                e.stopPropagation();
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', () => {
+                const dropdown = document.querySelector('.profile-dropdown');
+                if (dropdown.classList.contains('active')) {
+                    dropdown.classList.remove('active');
+                }
+            });
+
             // Click vào người dùng trong danh sách
-            $('.chat-user').click(function() {
+            $('.contact-item').click(function() {
                 const userId = $(this).data('user-id');
                 window.location.href = `/messages/?user_id=${userId}`;
             });
@@ -162,12 +179,12 @@
                             if (response.status === 'success') {
                                 // Thêm tin nhắn mới vào khung chat
                                 const messageHtml = `
-                                    <div class="flex items-start justify-end space-x-3">
-                                        <div class="bg-blue-600 text-white px-4 py-2 rounded-lg max-w-[75%]">
-                                            <p class="text-sm">${response.message.content}</p>
-                                            <span class="text-xs text-gray-300">${response.message.created_at}</span>
+                                    <div class="message sent">
+                                        <img src="{{ user_profile.profileimg.url }}" alt="Avatar của bạn">
+                                        <div class="message-content">
+                                            <p>${response.message.content}</p>
+                                            <span class="timestamp">${response.message.created_at}</span>
                                         </div>
-                                        <img src="${$('.header-avatar').attr('src')}" class="w-9 h-9 rounded-full object-cover" alt="Avatar của bạn">
                                     </div>
                                 `;
                                 $('#messages-container').append(messageHtml);
@@ -199,30 +216,25 @@
 
             function updateMessages(messages) {
                 const container = $('#messages-container');
-                container.empty();
+                let html = '';
                 
-                messages.forEach(function(message) {
-                    const isSender = message.sender_id === {{ request.user.id }};
-                    const messageHtml = isSender ? `
-                        <div class="flex items-start justify-end space-x-3">
-                            <div class="bg-blue-600 text-white px-4 py-2 rounded-lg max-w-[75%]">
-                                <p class="text-sm">${message.content}</p>
-                                <span class="text-xs text-gray-300">${message.created_at}</span>
-                            </div>
-                            <img src="${$('.header-avatar').attr('src')}" class="w-9 h-9 rounded-full object-cover" alt="Avatar của bạn">
-                        </div>
-                    ` : `
-                        <div class="flex items-start space-x-3">
-                            <img src="${$('.chat-user[data-user-id="{{ selected_user.id }}"] img').attr('src')}" class="w-9 h-9 rounded-full object-cover" alt="Avatar">
-                            <div class="bg-gray-100 px-4 py-2 rounded-lg max-w-[75%]">
-                                <p class="text-sm text-gray-800">${message.content}</p>
-                                <span class="text-xs text-gray-500">${message.created_at}</span>
+                messages.forEach(msg => {
+                    const isSent = msg.sender_id === {{ request.user.id }};
+                    const messageClass = isSent ? 'sent' : 'received';
+                    const avatar = isSent ? '{{ user_profile.profileimg.url }}' : '{{ selected_user_profile.profileimg.url }}';
+                    
+                    html += `
+                        <div class="message ${messageClass}">
+                            <img src="${avatar}" alt="Avatar">
+                            <div class="message-content">
+                                <p>${msg.content}</p>
+                                <span class="timestamp">${msg.created_at}</span>
                             </div>
                         </div>
                     `;
-                    container.append(messageHtml);
                 });
                 
+                container.html(html);
                 container.scrollTop(container[0].scrollHeight);
             }
         });
