@@ -53,22 +53,24 @@ def create_group(request):
 @login_required
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id)
+    
+    # Get user profile
+    user_profile = Profile.objects.get(user=request.user)
+    
+    # Check if user is a member
     is_member = GroupMember.objects.filter(group=group, user=request.user).exists()
+    
+    # Check if user is admin
     is_admin = group.admin == request.user
     
-    if not is_member and group.is_private:
-        messages.error(request, 'Bạn không có quyền truy cập nhóm này')
-        return redirect('index')
-
-    posts = GroupPost.objects.filter(group=group).order_by('-created_at')
-    paginator = Paginator(posts, 10)
+    # Get group posts with pagination
+    posts = group.posts.all().order_by('-created_at')
+    paginator = Paginator(posts, 10)  # Show 10 posts per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    # Lấy danh sách nhóm gợi ý
-    suggested_groups = Group.objects.exclude(
-        id__in=GroupMember.objects.filter(user=request.user).values_list('group_id', flat=True)
-    )[:5]
+    # Get suggested groups
+    suggested_groups = Group.objects.exclude(id=group_id).order_by('?')[:5]
 
     context = {
         'group': group,
@@ -76,6 +78,7 @@ def group_detail(request, group_id):
         'is_admin': is_admin,
         'posts': page_obj,
         'suggested_groups': suggested_groups,
+        'user_profile': user_profile
     }
     return render(request, 'GroupPage.html', context)
 
@@ -91,9 +94,12 @@ def group_settings(request, group_id):
         status='pending'
     ).order_by('-created_at')
 
+    user_profile = Profile.objects.get(user=request.user)
+
     context = {
         'group': group,
-        'pending_requests': pending_requests
+        'pending_requests': pending_requests,
+        'user_profile': user_profile
     }
     return render(request, 'SettingGroupPage.html', context)
 
@@ -104,6 +110,14 @@ def update_group(request, group_id):
     if group.admin != request.user:
         messages.error(request, 'Bạn không có quyền chỉnh sửa nhóm này')
         return redirect('group_detail', group_id=group.id)
+
+    # Handle profile image upload
+    if request.FILES.get('profile_image'):
+        group.profile_image = request.FILES.get('profile_image')
+            
+    # Handle cover photo upload
+    if request.FILES.get('cover_photo'):
+        group.cover_photo = request.FILES.get('cover_photo')
 
     group.name = request.POST.get('name')
     group.description = request.POST.get('description')
@@ -264,3 +278,22 @@ def handle_join_request(request, request_id):
         return JsonResponse({'status': 'error', 'message': 'Hành động không hợp lệ'})
 
     return JsonResponse({'status': 'success', 'message': message}) 
+
+@login_required
+@require_POST
+def delete_post(request, post_id):
+    post = get_object_or_404(GroupPost, id=post_id)
+    group = post.group
+
+    # Check if user has permission to delete the post
+    if post.user != request.user and group.admin != request.user:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Bạn không có quyền xóa bài viết này'
+        })
+
+    post.delete()
+    return JsonResponse({
+        'status': 'success',
+        'message': 'Đã xóa bài viết'
+    }) 

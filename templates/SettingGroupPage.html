@@ -9,28 +9,43 @@
     <title>Cài đặt nhóm - {{ group.name }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'new_css/group_settings_style.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <body>
     <header class="navbar">
         <div class="container">
-            <div class="logo">UTESocialMedia</div>
-            <nav>
-                <ul>
-                    <li><a href="{% url 'index' %}">Trang chủ</a></li>
-                    <li><a href="{% url 'profile' request.user.username %}">Trang cá nhân</a></li>
-                    <li><a href="{% url 'search' %}">Tìm kiếm</a></li>
-                </ul>
-            </nav>
+            <div class="logo">
+                <a href="/">UTESocialMedia</a>
+            </div>
             <div class="search-bar">
-                <form action="/search" method="POST" style="display: flex; align-items: center;">
+                <form action="/search" method="POST">
                     {% csrf_token %}
-                    <input type="text" name="username" placeholder="Tìm kiếm người hoặc nhóm">
-                    <button type="submit" style="border: none; background: none; cursor: pointer; margin-left: 10px;">
-                        <i class="fa fa-search fa-1x"></i>
-                    </button>
+                    <input type="text" name="username" placeholder="Tìm kiếm người dùng...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
                 </form>
             </div>
+            <nav>
+                <ul>
+                    <li><a href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
+                    <li><a href="{% url 'create_group' %}"><i class="fa fa-users"></i> Tạo nhóm</a></li>
+                    <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li class="profile-menu">
+                        <a href="#">
+                            <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="/profile/{{user_profile.user.username}}"><i class="fa fa-user"></i> Trang cá nhân</a></li>
+                                <li><a href="/settings"><i class="fa fa-cog"></i> Quản lý tài khoản</a></li>
+                                <li><a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </header>
 
@@ -53,6 +68,36 @@
                 <h3>Thông tin nhóm</h3>
                 <form method="POST" action="{% url 'update_group' group.id %}" enctype="multipart/form-data" class="settings-form">
                     {% csrf_token %}
+                    <div class="form-group cover-photo-group">
+                        <label>Ảnh bìa nhóm</label>
+                        <div class="cover-photo-container">
+                            <div class="cover-preview">
+                                <img src="{{ group.cover_photo.url }}" alt="Cover Photo" class="current-cover-photo" id="coverPreview">
+                            </div>
+                            <div class="cover-upload">
+                                <label for="cover_photo" class="upload-label">
+                                    <i class="fa fa-camera"></i> Thay đổi ảnh bìa
+                                </label>
+                                <input type="file" id="cover_photo" name="cover_photo" class="file-input" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group profile-image-group">
+                        <label>Ảnh đại diện nhóm</label>
+                        <div class="profile-image-container">
+                            <div class="image-wrapper">
+                                <img src="{{ group.profile_image.url }}" alt="Profile Picture" class="current-profile-image" id="profilePreview">
+                            </div>
+                            <div class="image-upload">
+                                <label for="profile_image" class="upload-label">
+                                    <i class="fa fa-camera"></i> Thay đổi ảnh đại diện
+                                </label>
+                                <input type="file" id="profile_image" name="profile_image" class="file-input" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="name">Tên nhóm</label>
                         <input type="text" id="name" name="name" value="{{ group.name }}" required>
@@ -133,21 +178,21 @@
                         <img src="{{ request.user.profile.profileimg.url }}" alt="Avatar {{ request.user.username }}">
                         <div class="member-info">
                             <span>{{ request.user.username }}</span>
-                            <span class="member-role">Đang chờ phê duyệt</span>
+                            <span class="member-role">Yêu cầu tham gia</span>
                         </div>
                         <div class="member-actions">
                             <form method="POST" action="{% url 'handle_join_request' request.id %}" class="inline">
                                 {% csrf_token %}
-                                <input type="hidden" name="action" value="reject">
-                                <button type="submit" class="remove-member-button">
-                                    Từ chối
+                                <input type="hidden" name="action" value="accept">
+                                <button type="submit" class="accept-button">
+                                    Chấp nhận
                                 </button>
                             </form>
                             <form method="POST" action="{% url 'handle_join_request' request.id %}" class="inline">
                                 {% csrf_token %}
-                                <input type="hidden" name="action" value="accept">
-                                <button type="submit" class="save-button">
-                                    Chấp nhận
+                                <input type="hidden" name="action" value="reject">
+                                <button type="submit" class="reject-button">
+                                    Từ chối
                                 </button>
                             </form>
                         </div>
@@ -161,45 +206,65 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 UTESocial. All rights reserved.</p>
-            <ul>
-                <li><a href="#">Chính sách bảo mật</a></li>
-                <li><a href="#">Điều khoản sử dụng</a></li>
-                <li><a href="#">Liên hệ</a></li>
-            </ul>
+            <p>&copy; 2024 UTESocialMedia. All rights reserved.</p>
         </div>
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const sidebarLinks = document.querySelectorAll('.settings-sidebar nav ul li a');
+        // Profile dropdown functionality
+        const profileMenu = document.querySelector('.profile-menu');
+        profileMenu.addEventListener('click', (e) => {
+            const dropdown = profileMenu.querySelector('.profile-dropdown');
+            dropdown.classList.toggle('active');
+            e.stopPropagation();
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            const dropdown = document.querySelector('.profile-dropdown');
+            if (dropdown && dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Image preview functionality
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(previewId).src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        document.getElementById('profile_image').addEventListener('change', function() {
+            previewImage(this, 'profilePreview');
+        });
+
+        document.getElementById('cover_photo').addEventListener('change', function() {
+            previewImage(this, 'coverPreview');
+        });
+
+        // Settings navigation
+        const settingsLinks = document.querySelectorAll('.settings-sidebar a');
             const settingsSections = document.querySelectorAll('.settings-section');
 
-            // Function to show/hide sections based on active link
-            function showSection(targetId) {
-                settingsSections.forEach(section => {
-                    if (section.id === targetId.substring(1)) {
+        settingsLinks.forEach((link) => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+
+                // Update active link
+                settingsLinks.forEach((l) => l.classList.remove('active'));
+                link.classList.add('active');
+
+                // Show target section
+                settingsSections.forEach((section) => {
+                    section.classList.remove('active-section');
+                    if (section.id === targetId) {
                         section.classList.add('active-section');
-                    } else {
-                        section.classList.remove('active-section');
                     }
-                });
-
-                sidebarLinks.forEach(link => {
-                    if (link.getAttribute('href') === targetId) {
-                        link.classList.add('active');
-                    } else {
-                        link.classList.remove('active');
-                    }
-                });
-            }
-
-            // Add click event listeners to sidebar links
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const targetId = link.getAttribute('href');
-                    showSection(targetId);
                 });
             });
         });

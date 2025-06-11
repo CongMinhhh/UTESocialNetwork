@@ -506,10 +506,13 @@ body {
 }
 
 .navbar .profile-img {
-    width: 35px;
-    height: 35px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     object-fit: cover;
+    cursor: pointer;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .profile-menu {
@@ -519,13 +522,15 @@ body {
 .profile-dropdown {
     display: none;
     position: absolute;
-    right: 0;
     top: 100%;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    right: 0;
+    background: #fff;
     border-radius: 8px;
-    min-width: 200px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    padding: 8px 0;
     z-index: 1000;
+    margin-top: 10px;
 }
 
 .profile-dropdown.active {
@@ -534,23 +539,25 @@ body {
 
 .profile-dropdown ul {
     list-style: none;
-    padding: 8px 0;
     margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
 }
 
 .profile-dropdown ul li {
-    width: 100%;
+    margin: 0;
 }
 
 .profile-dropdown ul li a {
     padding: 12px 20px;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     color: #333;
     text-decoration: none;
-    transition: background-color 0.3s;
-    width: 100%;
+    transition: background-color 0.2s;
+    font-size: 14px;
 }
 
 .profile-dropdown ul li a:hover {
@@ -898,4 +905,256 @@ body {
 
 .confirm-delete-btn:hover {
     background-color: #c82333;
+}
+
+/* Joined Groups Section */
+.joined-groups {
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.joined-groups h3 {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
+.joined-groups h3 i {
+    color: #4a90e2;
+}
+
+.groups-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.group-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    text-decoration: none;
+    color: inherit;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.group-item:hover {
+    background-color: #f5f5f5;
+}
+
+.group-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.group-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.group-info {
+    flex-grow: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.group-info h4 {
+    font-size: 14px;
+    color: #333;
+    margin: 0 0 2px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+.member-count {
+    font-size: 12px;
+    color: #666;
+    display: block;
+}
+
+.no-groups {
+    color: #666;
+    font-size: 13px;
+    text-align: center;
+    padding: 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .joined-groups {
+        margin-top: 15px;
+        padding: 12px;
+    }
+
+    .group-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .group-info h4 {
+        font-size: 13px;
+    }
+
+    .member-count {
+        font-size: 11px;
+    }
+}
+
+/* Share Modal Styles */
+.share-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.share-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #f0f2f5;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.share-option:hover {
+    background-color: #e4e6e9;
+}
+
+.share-option i {
+    font-size: 20px;
+}
+
+.share-option i.fa-facebook {
+    color: #1877f2;
+}
+
+.share-option i.fa-twitter {
+    color: #1da1f2;
+}
+
+.share-option i.fa-link {
+    color: #666;
+}
+
+.share-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    margin: 0;
+}
+
+.share-btn:hover {
+    color: #1877f2;
+}
+
+.cancel-share-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #e4e6e9;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.cancel-share-btn:hover {
+    background-color: #dadde1;
+}
+
+/* Post Detail Page Styles */
+.post-detail-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+.post-detail-container .post-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0;
+}
+
+.post-detail-container .post-content {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin: 15px 0;
+}
+
+.post-detail-container .post-image {
+    max-height: 600px;
+    width: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.post-detail-container .comments-section {
+    display: block !important;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+/* Shared Post Styles */
+.shared-post-header {
+    padding: 8px 15px;
+    background-color: #f0f2f5;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-size: 14px;
+    color: #65676b;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.shared-post-header i {
+    margin-right: 5px;
+}
+
+.shared-post-header a {
+    color: #1877f2;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.shared-post-header a:hover {
+    text-decoration: underline;
+}
+
+.shared-post-header a + a {
+    margin-left: 3px;
+}
+
+.post-card.shared {
+    border-left: 3px solid #1877f2;
 }

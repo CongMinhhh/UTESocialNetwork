@@ -8,6 +8,7 @@
     <link href="{% static 'favicon.png' %}" rel="icon" type="image/png">
     <title>{{ group.name }} - UTE Social Network</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
     <link rel="stylesheet" href="{% static 'new_css/group_page_style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
@@ -15,23 +16,36 @@
 <body>
     <header class="navbar">
         <div class="container">
-            <div class="logo">UTESocialMedia</div>
-            <nav>
-                <ul>
-                    <li><a href="{% url 'index' %}">Trang chủ</a></li>
-                    <li><a href="{% url 'profile' request.user.username %}">Trang cá nhân</a></li>
-                    <li><a href="{% url 'search' %}">Tìm kiếm</a></li>
-                </ul>
-            </nav>
+            <div class="logo">
+                <a href="/">UTESocialMedia</a>
+            </div>
             <div class="search-bar">
-                <form action="/search" method="POST" style="display: flex; align-items: center;">
+                <form action="/search" method="POST">
                     {% csrf_token %}
-                    <input type="text" name="username" placeholder="Tìm kiếm người hoặc nhóm">
-                    <button type="submit" style="border: none; background: none; cursor: pointer; margin-left: 10px;">
-                        <i class="fa fa-search fa-1x"></i>
-                    </button>
+                    <input type="text" name="username" placeholder="Tìm kiếm người dùng...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
                 </form>
             </div>
+            <nav>
+                <ul>
+                    <li><a href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
+                    <li><a href="{% url 'create_group' %}"><i class="fa fa-users"></i> Tạo nhóm</a></li>
+                    <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li class="profile-menu">
+                        <a href="#">
+                            <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="/profile/{{user_profile.user.username}}"><i class="fa fa-user"></i> Trang cá nhân</a></li>
+                                <li><a href="/settings"><i class="fa fa-cog"></i> Quản lý tài khoản</a></li>
+                                <li><a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </header>
 
@@ -39,14 +53,18 @@
         <!-- Group Header Section -->
         <section class="group-header">
             <div class="group-cover-photo">
-                <img src="{% static 'images/resources/timeline-1.jpg' %}" alt="Group Cover Photo">
+                {% if group.cover_photo %}
+                    <img src="{{ group.cover_photo.url }}" alt="Group Cover Photo">
+                {% else %}
+                    <img src="{% static 'images/resources/timeline-1.jpg' %}" alt="Default Cover Photo">
+                {% endif %}
             </div>
             <div class="group-info-bar">
-                <div class="group-icon">
+                <div class="group-profile-image">
                     {% if group.profile_image %}
-                        <img src="{{ group.profile_image.url }}" alt="Group Icon">
+                        <img src="{{ group.profile_image.url }}" alt="Group Icon" class="group-icon">
                     {% else %}
-                        <img src="{% static 'assets/images/avatars/avatar_gr.jpg' %}" alt="Default Group Icon">
+                        <img src="/media/blank-group-picture.png" alt="Default Group Icon" class="group-icon">
                     {% endif %}
                 </div>
                 <div class="group-details">
@@ -83,16 +101,15 @@
         <section class="group-section active-section">
             {% if is_member %}
             <div class="create-post card">
-                <a href="#" uk-toggle="target: #create-post-modal" class="create-post-button">
+                <a href="#" class="create-post-btn">
                     <textarea placeholder="Viết gì đó cho nhóm..." readonly></textarea>
-                    <button>Đăng bài</button>
                 </a>
             </div>
             {% endif %}
 
             <!-- Posts List -->
             <div class="posts-container">
-                {% for post in posts reversed %}
+                {% for post in posts %}
                 <div class="post-card card">
                     <div class="post-header">
                         <div class="post-header-content">
@@ -129,19 +146,38 @@
                     {% endif %}
 
                     <div class="post-actions">
-                        <a href="/like-post?post_id={{post.id}}" class="action-link">
-                            {% if post.no_of_likes == 0 %}
-                            <span>👍 Chưa có lượt thích nào</span>
-                            {% else %}
-                            <span>👍 {{post.no_of_likes}} lượt thích</span>
-                            {% endif %}
+                        <a href="#" onclick="likePost('{{post.id}}'); return false;" class="action-link">
+                            <span><i class="fa fa-thumbs-up"></i> {{post.likes.count}} lượt thích</span>
                         </a>
+                        <span><i class="fa fa-comment"></i> Bình luận</span>
+                        <span><i class="fa fa-share"></i> Chia sẻ</span>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </section>
     </main>
+
+    <!-- Create Post Modal -->
+    <div id="post-modal" class="modal">
+        <div class="modal-content">
+            <form id="create-post-form">
+                {% csrf_token %}
+                <h3>Đăng bài viết mới</h3>
+                <textarea name="content" placeholder="Viết gì đó cho nhóm..."></textarea>
+                <div class="file-upload">
+                    <label for="image-upload" class="file-label">
+                        <i class="fa fa-image"></i> Chọn ảnh
+                    </label>
+                    <input id="image-upload" type="file" name="image" class="file-input" accept="image/*">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn">Hủy</button>
+                    <button type="submit" class="submit-btn">Đăng bài</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <footer class="footer">
         <div class="container">
@@ -154,43 +190,166 @@
         </div>
     </footer>
 
-    <!-- Create Post Modal -->
-    <div id="create-post-modal" class="uk-modal-full" uk-modal>
-        <div class="uk-modal-dialog">
-            <button class="uk-modal-close-full uk-close-large" type="button" uk-close></button>
-            <div class="uk-grid-collapse uk-child-width-1-2@s uk-flex-middle" uk-grid>
-                <div class="uk-padding-large">
-                    <form action="upload-post" method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="post-form-container">
-                            <textarea name="content" placeholder="Viết gì đó cho nhóm..."></textarea>
-                            <input type="file" name="image_upload" accept="image/*">
-                            <input type="hidden" name="group_id" value="{{ group.id }}">
-                            <button type="submit" class="create-post-button">Đăng bài</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
     <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'assets/js/uikit.js' %}"></script>
     <script src="{% static 'assets/js/simplebar.js' %}"></script>
     <script src="{% static 'assets/js/custom.js' %}"></script>
-    <script src="{% static '../../unpkg.com/ionicons%405.2.3/dist/ionicons.js' %}"></script>
 
     <script>
-        function joinGroup(groupId) {
-            window.location.href = `/join-group/${groupId}`;
+        // Profile dropdown functionality
+        const profileMenu = document.querySelector('.profile-menu');
+        profileMenu.addEventListener('click', (e) => {
+            const dropdown = profileMenu.querySelector('.profile-dropdown');
+            dropdown.classList.toggle('active');
+            e.stopPropagation();
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            const dropdown = document.querySelector('.profile-dropdown');
+            if (dropdown && dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Post Modal Handling
+        const createPostBtn = document.querySelector('.create-post-btn');
+        const modal = document.getElementById('post-modal');
+        const cancelBtn = document.querySelector('.cancel-btn');
+
+        if (createPostBtn) {
+            createPostBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                modal.style.display = 'block';
+            });
         }
 
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Create Post Form Handling
+        const createPostForm = document.getElementById('create-post-form');
+        if (createPostForm) {
+            createPostForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(createPostForm);
+                formData.append('group_id', '{{ group.id }}');
+
+                try {
+                    const response = await fetch(`/group/{{ group.id }}/post/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra khi đăng bài');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi đăng bài');
+                }
+            });
+        }
+
+        // Group functionality
+        function joinGroup(groupId) {
+            fetch(`/group/${groupId}/join/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi tham gia nhóm');
+            });
+        }
+
+        // Like post functionality
+        function likePost(postId) {
+            fetch(`/group/post/${postId}/like/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+        }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi thích bài viết');
+            });
+        }
+
+        // Delete post functionality
         function deletePost(postId) {
             if (confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
-                window.location.href = `/delete-post/${postId}`;
+                fetch(`/group/post/${postId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Có lỗi xảy ra khi xóa bài viết');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi xóa bài viết');
+                });
             }
         }
+
+        // Post options dropdown
+        document.querySelectorAll('.options-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dropdown = button.nextElementSibling;
+                dropdown.classList.toggle('active');
+            });
+        });
+
+        // Close all dropdowns when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.options-dropdown').forEach(dropdown => {
+                dropdown.classList.remove('active');
+            });
+        });
     </script>
 </body>
 </html> 

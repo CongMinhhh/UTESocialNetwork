@@ -7,14 +7,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{% static 'assets/images/favicon.png' %}" rel="icon" type="image/png">
     <title>Tìm kiếm - UTE Social Media</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'assets/css/icons.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/uikit.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'assets/css/tailwind.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
     <link rel="stylesheet" href="{% static 'new_css/search_results_style.css' %}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -23,21 +17,36 @@
 <body>
     <header class="navbar">
         <div class="container">
-            <a href="/" class="logo">UTE Social Media</a>
+            <div class="logo">
+                <a href="/">UTESocialMedia</a>
+            </div>
+            <div class="search-bar">
+                <form action="/search" method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="username" placeholder="Tìm kiếm người dùng...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
+            </div>
             <nav>
                 <ul>
-                    <li><a href="/">Trang chủ</a></li>
-                    <li><a href="/profile/{{user_profile.user}}">Trang cá nhân</a></li>
-                    <li><a href="/messages">Tin nhắn</a></li>
-                    <li><a href="/settings">Cài đặt</a></li>
+                    <li><a href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
+                    <li><a href="{% url 'create_group' %}"><i class="fa fa-users"></i> Tạo nhóm</a></li>
+                    <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li class="profile-menu">
+                        <a href="#">
+                            <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="/profile/{{user_profile.user.username}}"><i class="fa fa-user"></i> Trang cá nhân</a></li>
+                                <li><a href="/settings"><i class="fa fa-cog"></i> Quản lý tài khoản</a></li>
+                                <li><a href="/logout"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
                 </ul>
             </nav>
-            <div class="user-area">
-                <span class="welcome-text">Xin chào, <b>{{user.username}}</b></span>
-                <a href="/profile/{{user_profile.user}}">
-                    <img src="{{ user_profile.profileimg.url }}" class="header-avatar" alt="Avatar">
-                </a>
-            </div>
         </div>
     </header>
 
@@ -60,13 +69,54 @@
             {% endif %}
 
             <div class="search-filters">
-                <button class="filter-button active" data-target="users">Người dùng</button>
+                <button class="filter-button active" data-target="all">Tất cả</button>
+                <button class="filter-button" data-target="users">Người dùng</button>
                 <button class="filter-button" data-target="groups">Nhóm</button>
             </div>
 
             <div class="search-results-display">
-                <!-- User Results -->
-                <section id="users-section" class="results-section active-section">
+                <!-- All Results Section -->
+                <section id="all-section" class="results-section active-section">
+                    {% if username_profile_list or groups %}
+                        <div class="results-grid mixed-grid">
+                            {% for users in username_profile_list %}
+                            <div class="result-card person-card">
+                                <div class="result-type-badge">Người dùng</div>
+                                <a href="/profile/{{users.user}}" class="person-image">
+                                    <img src="{{users.profileimg.url}}" alt="{{users.user}}">
+                                </a>
+                                <div class="person-info">
+                                    <h5><a href="/profile/{{users.user}}">@{{users.user}}</a></h5>
+                                    {% if users.location %}
+                                    <p class="location"><i class="fa fa-map-marker"></i> {{users.location}}</p>
+                                    {% endif %}
+                                    {% if users.bio %}
+                                    <p class="bio">{{users.bio}}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                            {% for group in groups %}
+                            <div class="result-card group-card">
+                                <div class="result-type-badge">Nhóm</div>
+                                <a href="{% url 'group_detail' group.id %}" class="group-image">
+                                    <img src="{{ group.profile_image.url }}" alt="{{ group.name }}">
+                                </a>
+                                <div class="group-info">
+                                    <h5><a href="{% url 'group_detail' group.id %}">{{ group.name }}</a></h5>
+                                    <p class="member-count"><i class="fa fa-users"></i> {{ group.members.count }} thành viên</p>
+                                    {% if group.description %}
+                                    <p class="description">{{ group.description }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </section>
+
+                <!-- Users Section -->
+                <section id="users-section" class="results-section">
                     {% if username_profile_list %}
                         <div class="results-grid people-grid">
                             {% for users in username_profile_list %}
@@ -86,14 +136,11 @@
                             </div>
                             {% endfor %}
                         </div>
-                    {% else %}
-                        {% if username %}
-                        <p class="no-results">Không tìm thấy người dùng nào phù hợp.</p>
-                        {% endif %}
                     {% endif %}
                 </section>
 
-                <!-- Group Results -->
+
+                <!-- Groups Section -->
                 <section id="groups-section" class="results-section">
                     {% if groups %}
                         <div class="results-grid groups-grid">
@@ -117,10 +164,6 @@
                             </div>
                             {% endfor %}
                         </div>
-                    {% else %}
-                        {% if username %}
-                        <p class="no-results">Không tìm thấy nhóm nào phù hợp.</p>
-                        {% endif %}
                     {% endif %}
                 </section>
             </div>
@@ -128,6 +171,22 @@
     </main>
 
     <script>
+        // Profile dropdown
+        const profileMenu = document.querySelector('.profile-menu');
+        profileMenu.addEventListener('click', (e) => {
+            const dropdown = profileMenu.querySelector('.profile-dropdown');
+            dropdown.classList.toggle('active');
+            e.stopPropagation();
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', () => {
+            const dropdown = document.querySelector('.profile-dropdown');
+            if (dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+            }
+        });
+
         // Tab switching functionality
         document.querySelectorAll('.filter-button').forEach(button => {
             button.addEventListener('click', () => {
@@ -161,13 +220,6 @@
             });
         }
     </script>
-
-    <!-- Scripts -->
-    <script src="{% static 'assets/js/tippy.all.min.js' %}"></script>
-    <script src="{% static 'assets/js/jquery-3.3.1.min.js' %}"></script>
-    <script src="{% static 'assets/js/uikit.js' %}"></script>
-    <script src="{% static 'assets/js/simplebar.js' %}"></script>
-    <script src="{% static 'assets/js/custom.js' %}"></script>
 </body>
 
 

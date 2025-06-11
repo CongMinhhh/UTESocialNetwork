@@ -74,6 +74,30 @@
                     <li><a href="/settings"><i class="fa fa-cog"></i> Cài đặt</a></li>
                 </ul>
             </nav>
+
+            <!-- Joined Groups Section
+            <div class="joined-groups">
+                <h3><i class="fa fa-users"></i> Nhóm của bạn</h3>
+                <div class="groups-list">
+                    {% for group in joined_groups %}
+                    <a href="{% url 'group_detail' group.id %}" class="group-item">
+                        <div class="group-avatar">
+                            {% if group.profile_image %}
+                                <img src="{{ group.profile_image.url }}" alt="{{ group.name }}">
+                            {% else %}
+                                <img src="/media/blank-group-picture.png" alt="{{ group.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="group-info">
+                            <h4>{{ group.name }}</h4>
+                            <span class="member-count">{{ group.members.count }} thành viên</span>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="no-groups">Bạn chưa tham gia nhóm nào</p>
+                    {% endfor %}
+                </div>
+            </div> -->
         </aside>
 
         <section class="newsfeed">
@@ -107,6 +131,11 @@
             <!-- Posts Feed -->
             {% for post in posts %}
             <div class="post-card">
+                {% if post.is_shared %}
+                <div class="shared-post-header">
+                    <i class="fa fa-share"></i> Được chia sẻ bởi <a href="/profile/{{post.shared_by}}">@{{post.shared_by}}</a> từ <a href="/profile/{{post.original_post.user}}">@{{post.original_post.user}}</a>
+                </div>
+                {% endif %}
                 <div class="post-header">
                     <div class="post-header-content">
                     <a href="/profile/{{post.user}}">
@@ -152,8 +181,54 @@
                     <a href="/like-post?post_id={{post.id}}" class="like-btn">
                         <span><i class="fa fa-thumbs-up"></i> {{post.no_of_likes}} Likes</span>
                     </a>
-                    <span><i class="fa fa-comment"></i> Bình luận</span>
-                    <span><i class="fa fa-share"></i> Chia sẻ</span>
+                    <button class="comment-btn" onclick="toggleComments('{{post.id}}')">
+                        <i class="fa fa-comment"></i> Bình luận
+                    </button>
+                    <button class="share-btn" onclick="openShareModal('{{post.id}}', '{{post.user}}')">
+                        <i class="fa fa-share"></i> Chia sẻ
+                    </button>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="comments-section" id="comments-{{post.id}}" style="display: none;">
+                    <div class="comments-list" id="comments-list-{{post.id}}">
+                        {% for comment in post.comments.all %}
+                        <div class="comment" id="comment-{{comment.id}}">
+                            <div class="comment-row-top">
+                                <div class="comment-user-info">
+                                    <div class="comment-avatar">
+                                        {% with profile=profiles|get_item:comment.user.username %}
+                                            {% if profile.profileimg %}
+                                                <img src="{{ profile.profileimg.url }}" alt="{{ comment.user.username }}">
+                                            {% else %}
+                                                <img src="/media/profile_images/blank-profile-picture.png" alt="{{ comment.user.username }}">
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                    <span class="comment-author">{{ comment.user.username }}</span>
+                                </div>
+                                <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+                            </div>
+                            <div class="comment-row-bottom">
+                                <p class="comment-text">{{ comment.text }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <form class="comment-form" onsubmit="submitComment(event, '{{post.id}}')">
+                        {% csrf_token %}
+                        <div class="comment-input-wrapper">
+                            {% if user_profile.profileimg %}
+                                <img src="{{ user_profile.profileimg.url }}" alt="{{ user.username }}" class="comment-user-avatar">
+                            {% else %}
+                                <img src="/media/profile_images/blank-profile-picture.png" alt="{{ user.username }}" class="comment-user-avatar">
+                            {% endif %}
+                            <input type="text" class="comment-input" placeholder="Viết bình luận..." required>
+                            <button type="submit" class="submit-comment-btn">
+                                <i class="fa fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
             {% endfor %}
@@ -184,6 +259,30 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Share Modal -->
+            <div id="share-modal" class="modal">
+                <div class="modal-content">
+                    <h3>Chia sẻ bài viết</h3>
+                    <div class="share-options">
+                        <button onclick="shareToProfile()" class="share-option">
+                            <i class="fa fa-user"></i> Chia sẻ lên trang cá nhân
+                        </button>
+                        <button onclick="shareToFacebook()" class="share-option">
+                            <i class="fa fa-facebook"></i> Facebook
+                        </button>
+                        <button onclick="shareToTwitter()" class="share-option">
+                            <i class="fa fa-twitter"></i> Twitter
+                        </button>
+                        <button onclick="copyLink()" class="share-option">
+                            <i class="fa fa-link"></i> Sao chép liên kết
+                        </button>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="cancel-share-btn" onclick="closeShareModal()">Đóng</button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <aside class="sidebar-right">
@@ -205,10 +304,10 @@
                 <ul>
                     {% for group in suggested_groups %}
                     <li>
-                        {% if group.group_image %}
-                            <img src="{{group.group_image.url}}" alt="Group Image">
+                        {% if group.profile_image %}
+                            <img src="{{group.profile_image.url}}" alt="Group Image">
                         {% else %}
-                            <img src="/media/default_group.png" alt="Default Group Image">
+                            <img src="/media/blank-group-picture.png" alt="Default Group Image">
                         {% endif %}
                         <span>{{group.name}}</span>
                         <a href="{% url 'group_detail' group.id %}" class="follow-btn">Xem</a>
@@ -352,6 +451,133 @@
                 alert('Có lỗi xảy ra khi xóa bài viết');
             }
         });
+
+        function toggleComments(postId) {
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            if (commentsSection.style.display === 'none') {
+                commentsSection.style.display = 'block';
+            } else {
+                commentsSection.style.display = 'none';
+            }
+        }
+
+        function submitComment(event, postId) {
+            event.preventDefault();
+            const form = event.target;
+            const input = form.querySelector('.comment-input');
+            const comment = input.value.trim();
+            
+            if (!comment) return;
+
+            fetch(`/post/${postId}/comment/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: `comment=${encodeURIComponent(comment)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const commentsList = document.getElementById(`comments-list-${postId}`);
+                    const newComment = document.createElement('div');
+                    newComment.className = 'comment';
+                    newComment.id = `comment-${data.comment.id}`;
+                    newComment.innerHTML = `
+                        <div class="comment-row-top">
+                            <div class="comment-user-info">
+                                <div class="comment-avatar">
+                                    <img src="${data.comment.user_profile_img || '/media/blank-profile-picture.png'}" alt="${data.comment.username}">
+                                </div>
+                                <span class="comment-author">${data.comment.username}</span>
+                            </div>
+                            <span class="comment-time">just now</span>
+                        </div>
+                        <div class="comment-row-bottom">
+                            <p class="comment-text">${data.comment.text}</p>
+                        </div>
+                    `;
+                    commentsList.appendChild(newComment);
+                    input.value = '';
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi thêm bình luận');
+            });
+        }
+
+        // Share functionality
+        const shareModal = document.getElementById('share-modal');
+        let currentSharePostId = null;
+        let currentShareUser = null;
+
+        function openShareModal(postId, username) {
+            currentSharePostId = postId;
+            currentShareUser = username;
+            shareModal.style.display = 'block';
+        }
+
+        function closeShareModal() {
+            shareModal.style.display = 'none';
+        }
+
+        function shareToFacebook() {
+            const postUrl = `${window.location.origin}/post/${currentSharePostId}`;
+            const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`;
+            window.open(fbShareUrl, '_blank');
+        }
+
+        function shareToTwitter() {
+            const postUrl = `${window.location.origin}/post/${currentSharePostId}`;
+            const tweetText = `Check out this post by ${currentShareUser} on UTE Social Network`;
+            const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(postUrl)}`;
+            window.open(twitterShareUrl, '_blank');
+        }
+
+        function copyLink() {
+            const postUrl = `${window.location.origin}/post/${currentSharePostId}`;
+            navigator.clipboard.writeText(postUrl).then(() => {
+                alert('Đã sao chép liên kết vào clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy link: ', err);
+            });
+        }
+
+        function shareToProfile() {
+            fetch(`/share-to-profile/${currentSharePostId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Bài viết đã được chia sẻ lên trang cá nhân của bạn!');
+                    closeShareModal();
+                    // Optionally refresh the page to show the shared post
+                    // window.location.reload();
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra khi chia sẻ bài viết');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi chia sẻ bài viết');
+            });
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == shareModal) {
+                closeShareModal();
+            }
+        }
     </script>
 </body>
 </html>

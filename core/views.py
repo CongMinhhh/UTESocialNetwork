@@ -3,12 +3,15 @@ from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost, FollowersCount, Group, Message, Product, ProductImage
+from .models import Profile, Post, LikePost, FollowersCount, Group, Message, Product, ProductImage, Comment
 from itertools import chain
 import random
 from django.db import models
 from django.db.models import Q
 from django.contrib.auth.hashers import check_password
+from django.views.decorators.http import require_POST
+from django.shortcuts import get_object_or_404
+from datetime import datetime
 
 # Create your views here.
 
@@ -82,6 +85,9 @@ def index(request):
     
     # Group suggestions
     all_groups = Group.objects.all().order_by('?')[:5]  # Get 5 random groups
+    
+    # Get user's joined groups
+    user_joined_groups = Group.objects.filter(members__user=user_object).order_by('name')
 
     return render(request, 'MainPage.html', {
         'user_profile': user_profile, 
@@ -90,7 +96,8 @@ def index(request):
         'suggestions_username_profile_list': suggestions_username_profile_list,
         'suggested_groups': all_groups,
         'user_followers': user_followers,
-        'user_following': user_following_count
+        'user_following': user_following_count,
+        'joined_groups': user_joined_groups
     })
 
 @login_required(login_url='signin')
@@ -125,7 +132,7 @@ def search(request):
 
         for ids in username_profile:
             profile_lists = Profile.objects.filter(id_user=ids)
-            username_profile_list.append(profile_lists)
+            username_profile_list.extend(profile_lists)
 
         # Tìm kiếm nhóm
         groups = Group.objects.filter(
@@ -138,7 +145,7 @@ def search(request):
 
         context = {
             'user_profile': user_profile,
-            'username_profile_list': username_profile_list[0] if username_profile_list else [],
+            'username_profile_list': username_profile_list,
             'username': username,
             'groups': groups,
             'user_groups': user_groups,
@@ -660,3 +667,97 @@ def search_market(request):
         return render(request, 'MarketPlace.html', context)
 
     return redirect('marketplace')
+
+@login_required
+@require_POST
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    comment_text = request.POST.get('comment')
+    
+    if not comment_text:
+        return JsonResponse({'status': 'error', 'message': 'Nội dung bình luận không được để trống'})
+
+    comment = Comment.objects.create(
+        post=post,
+        user=request.user,
+        text=comment_text
+    )
+
+    return JsonResponse({
+        'status': 'success',
+        'message': 'Đã thêm bình luận',
+        'comment': {
+            'id': str(comment.id),
+            'text': comment.text,
+            'username': comment.user.username,
+            'created_at': comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+            'user_profile_img': comment.user.profile.profileimg.url if hasattr(comment.user, 'profile') and comment.user.profile.profileimg else None
+        }
+    })
+
+@login_required(login_url='signin')
+def post_detail(request, post_id):
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    
+    try:
+        post = Post.objects.get(id=post_id)
+        user_post_profile = Profile.objects.get(user=User.objects.get(username=post.user))
+        
+        # Get user followers count
+        user_followers = len(FollowersCount.objects.filter(user=post.user))
+        user_following = len(FollowersCount.objects.filter(follower=post.user))
+        
+        context = {
+            'post': post,
+            'user_profile': user_profile,
+            'post_user_profile': user_post_profile,
+            'user_followers': user_followers,
+            'user_following': user_following,
+        }
+        return render(request, 'post_detail.html', context)
+    except Post.DoesNotExist:
+        return redirect('/')
+
+@login_required(login_url='signin')
+def share_to_profile(request, post_id):
+    if request.method == 'POST':
+        try:
+            original_post = Post.objects.get(id=post_id)
+            
+            # Create a new shared post
+            shared_post = Post(
+                user=request.user.username,
+                caption=f"Đã chia sẻ bài viết từ @{original_post.user}\n\n{original_post.caption}",
+                is_shared=True,
+                original_post=original_post,
+                shared_at=datetime.now(),
+                shared_by=request.user.username
+            )
+            
+            # If original post has an image, copy it to the shared post
+            if original_post.image:
+                shared_post.image = original_post.image
+            
+            shared_post.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Bài viết đã được chia sẻ thành công'
+            })
+            
+        except Post.DoesNotExist:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Không tìm thấy bài viết'
+            }, status=404)
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            }, status=500)
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Phương thức không được hỗ trợ'
+    }, status=405)

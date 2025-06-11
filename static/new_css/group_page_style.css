@@ -82,12 +82,10 @@ body {
 
 .group-cover-photo {
     width: 100%;
-    height: 280px; /* Fixed height for cover photo */
+    height: 300px; /* Fixed height for cover photo */
     overflow: hidden;
     background-color: #eee; /* Placeholder background */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
 }
 
 .group-cover-photo img {
@@ -100,26 +98,31 @@ body {
 .group-info-bar {
     display: flex;
     align-items: flex-end; /* Align items to the bottom */
-    padding: 0 40px 20px 40px; /* Adjust padding around elements */
+    padding: 20px 40px; /* Adjust padding around elements */
     position: relative;
-    margin-top: -60px; /* Pull group icon up over cover photo */
+    margin-top: -75px; /* Pull profile image up over cover photo */
     flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
-.group-icon {
-    width: 120px;
-    height: 120px;
-    border-radius: 12px; /* Slightly rounded corners for icon */
-    border: 4px solid #fff; /* White border around icon */
-    object-fit: cover;
+.group-profile-image {
     margin-right: 25px;
+}
+
+.group-icon {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%; /* Make it circular like profile photo */
+    border: 5px solid #fff; /* White border around profile pic */
+    object-fit: cover;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
 }
 
 .group-details {
     flex-grow: 1; /* Allows it to take up available space */
     text-align: left;
     margin-right: 20px; /* Space before actions */
+    padding-top: 30px; /* Align with bottom of profile image */
 }
 
 .group-details h1 {
@@ -139,9 +142,10 @@ body {
 .group-stats {
     display: flex;
     gap: 20px;
-    font-size: 14px;
+    font-size: 15px;
     color: #555;
     font-weight: 500;
+    margin-top: 10px;
 }
 
 .group-stats .stat-number {
@@ -152,11 +156,12 @@ body {
 .group-actions {
     display: flex;
     gap: 10px;
-    margin-bottom: 10px; /* Align buttons nicely at the bottom */
-    flex-wrap: wrap;
+    align-self: flex-start;
+    margin-top: 30px; /* Align with group details */
 }
 
-.group-actions button {
+.group-actions button,
+.group-actions a {
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
@@ -164,6 +169,9 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
 }
 
 .join-group-button {
@@ -185,18 +193,6 @@ body {
     background-color: #d0d0d0;
     transform: translateY(-1px);
 }
-
-.more-options {
-    background-color: #e0e0e0;
-    color: #333;
-    padding: 10px 15px; /* Smaller padding for '...' button */
-}
-
-.more-options:hover {
-    background-color: #d0d0d0;
-    transform: translateY(-1px);
-}
-
 
 /* Group Navigation (Tabs) */
 .group-nav {
@@ -584,7 +580,7 @@ body {
     }
 
     .group-cover-photo {
-        height: 180px; /* Shorter cover photo on smaller screens */
+        height: 200px;
     }
 
     .group-header {
@@ -602,6 +598,34 @@ body {
     .footer ul li {
         margin: 0 10px;
     }
+
+    .group-info-bar {
+        margin-top: -50px;
+        padding: 15px 20px;
+    }
+
+    .group-icon {
+        width: 100px;
+        height: 100px;
+        border-width: 3px;
+    }
+
+    .group-details {
+        padding-top: 20px;
+    }
+
+    .group-details h1 {
+        font-size: 24px;
+    }
+
+    .group-stats {
+        font-size: 14px;
+        gap: 15px;
+    }
+
+    .group-actions {
+        margin-top: 20px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -617,14 +641,23 @@ body {
         width: 150px;
     }
 
+    .group-cover-photo {
+        height: 150px;
+    }
+
+    .group-info-bar {
+        margin-top: -40px;
+        padding: 10px 15px;
+    }
+
     .group-icon {
         width: 80px;
         height: 80px;
-        border-width: 3px;
+        border-width: 2px;
     }
 
     .group-details h1 {
-        font-size: 24px;
+        font-size: 20px;
     }
 
     .group-details .group-tagline {
@@ -632,12 +665,13 @@ body {
     }
 
     .group-stats {
-        flex-direction: column;
-        gap: 5px;
-        font-size: 13px;
+        font-size: 12px;
+        gap: 10px;
+        flex-wrap: wrap;
     }
 
-    .group-actions button {
+    .group-actions button,
+    .group-actions a {
         padding: 8px 15px;
         font-size: 14px;
     }
@@ -685,5 +719,177 @@ body {
 
     .photo-gallery-grid img {
         height: 100px;
+    }
+}
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+
+.modal h3 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 24px;
+}
+
+.modal textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    resize: vertical;
+}
+
+.modal textarea:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
+}
+
+.file-upload {
+    margin-bottom: 20px;
+}
+
+.file-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #f0f2f5;
+    color: #333;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.file-label:hover {
+    background-color: #e4e6e9;
+}
+
+.file-label i {
+    margin-right: 8px;
+}
+
+.file-input {
+    display: none;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions button {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cancel-btn {
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+.cancel-btn:hover {
+    background-color: #e4e6e9;
+}
+
+.submit-btn {
+    background-color: #4a90e2;
+    color: #fff;
+}
+
+.submit-btn:hover {
+    background-color: #357abd;
+}
+
+/* Post Options Dropdown */
+.post-options {
+    position: relative;
+}
+
+.options-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    min-width: 180px;
+}
+
+.options-dropdown.active {
+    display: block;
+}
+
+.options-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.options-dropdown ul li {
+    padding: 0;
+}
+
+.options-dropdown ul li a {
+    display: block;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.options-dropdown ul li a:hover {
+    background-color: #f0f2f5;
+}
+
+.options-dropdown ul li a i {
+    margin-right: 8px;
+    width: 16px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-actions button {
+        width: 100%;
     }
 }

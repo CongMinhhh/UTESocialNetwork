@@ -1,0 +1,222 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài viết của {{post.user}} - UTE Social Network</title>
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <main class="container content-area">
+        <div class="post-detail-container">
+            <div class="post-card">
+                <div class="post-header">
+                    <div class="post-header-content">
+                        <a href="/profile/{{post.user}}">
+                            {% if post_user_profile.profileimg %}
+                                <img src="{{post_user_profile.profileimg.url}}" alt="User Avatar">
+                            {% else %}
+                                <img src="/media/profile_images/blank-profile-picture.png" alt="Default Profile Picture">
+                            {% endif %}
+                        </a>
+                        <div>
+                            <h4><a href="/profile/{{post.user}}">@{{post.user}}</a></h4>
+                            <span class="timestamp">{{post.created_at|timesince}} ago</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if post.caption %}
+                    <p class="post-content">{{post.caption}}</p>
+                {% endif %}
+
+                {% if post.image %}
+                    <img src="{{post.image.url}}" alt="Post Image" class="post-image">
+                {% endif %}
+
+                <div class="post-actions">
+                    <a href="/like-post?post_id={{post.id}}" class="like-btn">
+                        <span><i class="fa fa-thumbs-up"></i> {{post.no_of_likes}} Likes</span>
+                    </a>
+                    <button class="comment-btn" onclick="toggleComments('{{post.id}}')">
+                        <i class="fa fa-comment"></i> Bình luận
+                    </button>
+                    <button class="share-btn" onclick="openShareModal('{{post.id}}', '{{post.user}}')">
+                        <i class="fa fa-share"></i> Chia sẻ
+                    </button>
+                </div>
+
+                <!-- Comments Section -->
+                <div class="comments-section" id="comments-{{post.id}}">
+                    <div class="comments-list" id="comments-list-{{post.id}}">
+                        {% for comment in post.comments.all %}
+                        <div class="comment" id="comment-{{comment.id}}">
+                            <div class="comment-row-top">
+                                <div class="comment-user-info">
+                                    <div class="comment-avatar">
+                                        {% if comment.user.profile.profileimg %}
+                                            <img src="{{ comment.user.profile.profileimg.url }}" alt="{{ comment.user.username }}">
+                                        {% else %}
+                                            <img src="/media/profile_images/blank-profile-picture.png" alt="{{ comment.user.username }}">
+                                        {% endif %}
+                                    </div>
+                                    <span class="comment-author">{{ comment.user.username }}</span>
+                                </div>
+                                <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+                            </div>
+                            <div class="comment-row-bottom">
+                                <p class="comment-text">{{ comment.text }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <form class="comment-form" onsubmit="submitComment(event, '{{post.id}}')">
+                        {% csrf_token %}
+                        <div class="comment-input-wrapper">
+                            {% if user_profile.profileimg %}
+                                <img src="{{ user_profile.profileimg.url }}" alt="{{ user.username }}" class="comment-user-avatar">
+                            {% else %}
+                                <img src="/media/profile_images/blank-profile-picture.png" alt="{{ user.username }}" class="comment-user-avatar">
+                            {% endif %}
+                            <input type="text" class="comment-input" placeholder="Viết bình luận..." required>
+                            <button type="submit" class="submit-comment-btn">
+                                <i class="fa fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal">
+        <div class="modal-content">
+            <h3>Chia sẻ bài viết</h3>
+            <div class="share-options">
+                <button onclick="shareToFacebook()" class="share-option">
+                    <i class="fa fa-facebook"></i> Facebook
+                </button>
+                <button onclick="shareToTwitter()" class="share-option">
+                    <i class="fa fa-twitter"></i> Twitter
+                </button>
+                <button onclick="copyLink()" class="share-option">
+                    <i class="fa fa-link"></i> Sao chép liên kết
+                </button>
+            </div>
+            <div class="modal-actions">
+                <button class="cancel-share-btn" onclick="closeShareModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Share functionality
+        const shareModal = document.getElementById('share-modal');
+        let currentSharePostId = null;
+        let currentShareUser = null;
+
+        function openShareModal(postId, username) {
+            currentSharePostId = postId;
+            currentShareUser = username;
+            shareModal.style.display = 'block';
+        }
+
+        function closeShareModal() {
+            shareModal.style.display = 'none';
+        }
+
+        function shareToFacebook() {
+            const postUrl = window.location.href;
+            const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(postUrl)}`;
+            window.open(fbShareUrl, '_blank');
+        }
+
+        function shareToTwitter() {
+            const postUrl = window.location.href;
+            const tweetText = `Check out this post by ${currentShareUser} on UTE Social Network`;
+            const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(postUrl)}`;
+            window.open(twitterShareUrl, '_blank');
+        }
+
+        function copyLink() {
+            const postUrl = window.location.href;
+            navigator.clipboard.writeText(postUrl).then(() => {
+                alert('Đã sao chép liên kết vào clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy link: ', err);
+            });
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == shareModal) {
+                closeShareModal();
+            }
+        }
+
+        function toggleComments(postId) {
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            if (commentsSection.style.display === 'none') {
+                commentsSection.style.display = 'block';
+            } else {
+                commentsSection.style.display = 'none';
+            }
+        }
+
+        function submitComment(event, postId) {
+            event.preventDefault();
+            const form = event.target;
+            const input = form.querySelector('.comment-input');
+            const comment = input.value.trim();
+            
+            if (!comment) return;
+
+            fetch(`/post/${postId}/comment/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: `comment=${encodeURIComponent(comment)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const commentsList = document.getElementById(`comments-list-${postId}`);
+                    const newComment = document.createElement('div');
+                    newComment.className = 'comment';
+                    newComment.id = `comment-${data.comment.id}`;
+                    newComment.innerHTML = `
+                        <div class="comment-row-top">
+                            <div class="comment-user-info">
+                                <div class="comment-avatar">
+                                    <img src="${data.comment.user_profile_img || '/media/blank-profile-picture.png'}" alt="${data.comment.username}">
+                                </div>
+                                <span class="comment-author">${data.comment.username}</span>
+                            </div>
+                            <span class="comment-time">just now</span>
+                        </div>
+                        <div class="comment-row-bottom">
+                            <p class="comment-text">${data.comment.text}</p>
+                        </div>
+                    `;
+                    commentsList.appendChild(newComment);
+                    input.value = '';
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Đã xảy ra lỗi khi thêm bình luận');
+            });
+        }
+    </script>
+</body>
+</html> 
