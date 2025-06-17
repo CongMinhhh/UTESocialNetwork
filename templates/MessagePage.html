@@ -160,83 +160,120 @@
                 window.location.href = `/messages/?user_id=${userId}`;
             });
 
+            {% if selected_user %}
+            // Create WebSocket connection
+            const roomName = '{{ request.user.id }}_{{ selected_user.id }}'.split('_').sort().join('_');
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            let chatSocket = null;
+            let reconnectAttempts = 0;
+            const maxReconnectAttempts = 5;
+            let reconnectTimeout = null;
+
+            function connectWebSocket() {
+                if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                    console.log('WebSocket already connected');
+                    return;
+                }
+
+                if (reconnectTimeout) {
+                    clearTimeout(reconnectTimeout);
+                }
+
+                chatSocket = new WebSocket(
+                    wsProtocol + '//' + window.location.host + '/ws/chat/' + roomName + '/'
+                );
+
+                chatSocket.onopen = function(e) {
+                    console.log('WebSocket connection established');
+                    reconnectAttempts = 0;
+                };
+
+                chatSocket.onmessage = function(e) {
+                    try {
+                        const data = JSON.parse(e.data);
+                        if (data.error) {
+                            console.error('WebSocket error:', data.error);
+                            return;
+                        }
+                        
+                        const isSent = data.sender_id === {{ request.user.id }};
+                        const messageClass = isSent ? 'sent' : 'received';
+                        const avatar = isSent ? '{{ user_profile.profileimg.url }}' : '{{ selected_user_profile.profileimg.url }}';
+                        
+                        const messageHtml = `
+                            <div class="message ${messageClass}">
+                                <img src="${avatar}" alt="Avatar">
+                                <div class="message-content">
+                                    <p>${data.message}</p>
+                                    <span class="timestamp">${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        $('#messages-container').append(messageHtml);
+                        const container = $('#messages-container');
+                        container.scrollTop(container[0].scrollHeight);
+                    } catch (error) {
+                        console.error('Error processing message:', error);
+                    }
+                };
+
+                chatSocket.onclose = function(e) {
+                    console.log('WebSocket connection closed');
+                    if (reconnectAttempts < maxReconnectAttempts) {
+                        reconnectAttempts++;
+                        console.log(`Attempting to reconnect (${reconnectAttempts}/${maxReconnectAttempts})...`);
+                        reconnectTimeout = setTimeout(connectWebSocket, 5000);
+                    } else {
+                        console.error('Max reconnection attempts reached');
+                        alert('Lost connection to chat server. Please refresh the page.');
+                    }
+                };
+
+                chatSocket.onerror = function(e) {
+                    console.error('WebSocket error:', e);
+                };
+            }
+
+            // Initial connection
+            connectWebSocket();
+
             // Gửi tin nhắn
             $('#message-form').submit(function(e) {
                 e.preventDefault();
-                const receiverId = $(this).data('receiver-id');
-                const content = $('#message-input').val().trim();
+                const messageInput = $('#message-input');
+                const message = messageInput.val().trim();
                 
-                if (content) {
-                    $.ajax({
-                        url: '/send-message/',
-                        type: 'POST',
-                        data: {
-                            receiver_id: receiverId,
-                            content: content,
-                            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
-                        },
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                // Thêm tin nhắn mới vào khung chat
-                                const messageHtml = `
-                                    <div class="message sent">
-                                        <img src="{{ user_profile.profileimg.url }}" alt="Avatar của bạn">
-                                        <div class="message-content">
-                                            <p>${response.message.content}</p>
-                                            <span class="timestamp">${response.message.created_at}</span>
-                                        </div>
-                                    </div>
-                                `;
-                                $('#messages-container').append(messageHtml);
-                                $('#message-input').val('');
-                                
-                                // Cuộn xuống tin nhắn mới nhất
-                                const container = $('#messages-container');
-                                container.scrollTop(container[0].scrollHeight);
-                            }
-                        }
-                    });
+                if (message && chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                    try {
+                        chatSocket.send(JSON.stringify({
+                            'message': message,
+                            'receiver_id': {{ selected_user.id }}
+                        }));
+                        messageInput.val('');
+                    } catch (error) {
+                        console.error('Error sending message:', error);
+                        alert('Failed to send message. Please try again.');
+                    }
+                } else if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+                    alert('Connection lost. Please refresh the page.');
                 }
             });
+
+            // Clean up on page unload
+            window.addEventListener('beforeunload', function() {
+                if (chatSocket) {
+                    chatSocket.close();
+                }
+                if (reconnectTimeout) {
+                    clearTimeout(reconnectTimeout);
+                }
+            });
+            {% endif %}
 
             // Cuộn xuống tin nhắn mới nhất khi tải trang
             const container = $('#messages-container');
             container.scrollTop(container[0].scrollHeight);
-
-            // Cập nhật tin nhắn mỗi 5 giây
-            {% if selected_user %}
-            setInterval(function() {
-                $.get(`/get-messages/{{ selected_user.id }}/`, function(response) {
-                    if (response.status === 'success') {
-                        updateMessages(response.messages);
-                    }
-                });
-            }, 5000);
-            {% endif %}
-
-            function updateMessages(messages) {
-                const container = $('#messages-container');
-                let html = '';
-                
-                messages.forEach(msg => {
-                    const isSent = msg.sender_id === {{ request.user.id }};
-                    const messageClass = isSent ? 'sent' : 'received';
-                    const avatar = isSent ? '{{ user_profile.profileimg.url }}' : '{{ selected_user_profile.profileimg.url }}';
-                    
-                    html += `
-                        <div class="message ${messageClass}">
-                            <img src="${avatar}" alt="Avatar">
-                            <div class="message-content">
-                                <p>${msg.content}</p>
-                                <span class="timestamp">${msg.created_at}</span>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                container.html(html);
-                container.scrollTop(container[0].scrollHeight);
-            }
         });
     </script>
 </body>

@@ -1,0 +1,395 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: #f0f2f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: #ffffff;
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4a90e2;
+}
+
+.navbar nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 25px;
+}
+
+.navbar nav ul li a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.navbar nav ul li a:hover {
+    color: #4a90e2;
+}
+
+.navbar .profile-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+/* Profile Menu Styles */
+.profile-menu {
+    position: relative;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    padding: 8px 0;
+    display: none;
+    z-index: 1000;
+}
+
+.profile-dropdown.active {
+    display: block;
+}
+
+.profile-dropdown ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-direction: column;
+}
+
+.profile-dropdown ul li {
+    margin: 0;
+    padding: 0;
+}
+
+.profile-dropdown ul li a {
+    padding: 8px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.profile-dropdown ul li a:hover {
+    background-color: #f5f5f5;
+}
+
+/* Messages Page Content */
+.messages-page-content {
+    margin-top: 60px;
+    margin-bottom: 0;
+    min-height: calc(100vh - 60px);
+    padding: 0;
+}
+
+.container.messages-page-content {
+    max-width: 100%;
+    padding: 0;
+}
+
+.messaging-container {
+    display: flex;
+    background: #ffffff;
+    overflow: hidden;
+    height: calc(100vh - 60px);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+/* Contact List Sidebar */
+.contact-list-sidebar {
+    width: 320px;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+}
+
+.sidebar-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #1a1a1a;
+}
+
+.group-info {
+    padding: 15px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.group-info p {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.group-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 13px;
+    color: #666;
+}
+
+.group-stats span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.group-members {
+    padding: 15px 20px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.group-members h4 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.contacts {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.contact-item:hover {
+    background-color: #f8f9fa;
+}
+
+.contact-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    object-fit: cover;
+}
+
+.contact-info {
+    flex-grow: 1;
+}
+
+.contact-info h4 {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.admin-badge {
+    font-size: 12px;
+    color: #4a90e2;
+    margin: 0;
+}
+
+/* Message Display Area */
+.message-display-area {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f8f9fa;
+}
+
+.chat-header {
+    padding: 15px 20px;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.chat-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.messages-box {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.message {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 70%;
+}
+
+.message.sent {
+    margin-left: auto;
+    flex-direction: row-reverse;
+}
+
+.message img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.message-content {
+    background: #fff;
+    padding: 10px 15px;
+    border-radius: 15px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.message.sent .message-content {
+    background: #4a90e2;
+    color: #fff;
+}
+
+.message-content p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.timestamp {
+    font-size: 11px;
+    color: #666;
+    margin-top: 4px;
+    display: block;
+}
+
+.message.sent .timestamp {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.message-input-area {
+    padding: 15px 20px;
+    background: #fff;
+    border-top: 1px solid #e5e7eb;
+}
+
+.message-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.message-input:focus {
+    border-color: #4a90e2;
+}
+
+.send-button {
+    background: none;
+    border: none;
+    color: #4a90e2;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: color 0.3s ease;
+}
+
+.send-button:hover {
+    color: #357abd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .messaging-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .contact-list-sidebar {
+        width: 100%;
+        height: 300px;
+    }
+
+    .message-display-area {
+        height: calc(100vh - 450px);
+    }
+
+    .message {
+        max-width: 85%;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-list-sidebar {
+        height: 250px;
+    }
+
+    .message-display-area {
+        height: calc(100vh - 400px);
+    }
+
+    .message {
+        max-width: 90%;
+    }
+} 

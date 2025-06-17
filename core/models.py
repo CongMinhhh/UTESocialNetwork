@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class Profile(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='profile')
     id_user = models.IntegerField()
     bio = models.TextField(blank=True)
     profileimg = models.ImageField(upload_to='profile_images', default='blank-profile-picture.png')
@@ -170,3 +170,74 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.product.title}"
+
+class GroupMessage(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='group_messages')
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.ManyToManyField(User, related_name='read_group_messages', blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'Message in {self.group.name} from {self.sender.username}'
+
+class Quiz(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    date = models.DateField()
+    is_active = models.BooleanField(default=True)
+    
+    def __str__(self):
+        return f"Quiz for {self.date}"
+
+class Question(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    text = models.TextField()
+    option1 = models.CharField(max_length=255)
+    option2 = models.CharField(max_length=255)
+    option3 = models.CharField(max_length=255)
+    option4 = models.CharField(max_length=255)
+    correct_answer = models.CharField(max_length=1, choices=[
+        ('A', 'A'),
+        ('B', 'B'),
+        ('C', 'C'),
+        ('D', 'D'),
+    ])
+    
+    def __str__(self):
+        return f"Question {self.id} - {self.text[:50]}..."
+
+class QuizAttempt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
+    completed_at = models.DateTimeField(auto_now_add=True)
+    answers = models.JSONField(default=dict)  # Store user's answers
+    
+    class Meta:
+        unique_together = ['user', 'quiz']
+    
+    def __str__(self):
+        return f"{self.user.username}'s attempt on {self.quiz.date}"
+
+class Badge(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    image = models.ImageField(upload_to='badges')
+    criteria = models.JSONField()  # Store badge earning criteria
+    
+    def __str__(self):
+        return self.name
+
+class UserBadge(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    earned_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['user', 'badge']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.badge.name}"

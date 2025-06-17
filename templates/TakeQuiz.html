@@ -1,0 +1,258 @@
+{% extends 'MainPage.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'new_css/english_quiz_style.css' %}">
+
+<main class="container quiz-page-content">
+    <!-- Left Sidebar: User Information -->
+    <aside class="user-info-sidebar card">
+        <h3>My Profile</h3>
+        <div class="user-profile-summary">
+            <img src="{{ user_profile.profileimg.url }}" alt="{{ user.username }} Profile" class="profile-pic-small">
+            <h4>{{ user.username }}</h4>
+            <p class="user-status">Active Participant</p>
+            <div class="user-score-overall">
+                <span>Overall Score: <strong>{{ user_profile.total_score }}</strong></span>
+                <span>Badges: <strong>{{ user_badges|length }}</strong></span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Middle Section: Question Interface -->
+    <section class="question-interface-middle">
+        <div class="quiz-overview card">
+            <h2>Daily English Quiz</h2>
+            <div class="quiz-details">
+                <p><strong>Topic:</strong> <span id="quiz-topic">English Grammar</span></p>
+                <p><strong>Questions:</strong> <span id="num-questions">20</span></p>
+                <p><strong>Time Limit:</strong> <span id="time-limit">30 minutes</span></p>
+            </div>
+            <p class="current-question-status">Question <span id="current-question-number">1</span> of <span id="total-questions">20</span></p>
+        </div>
+
+        <div class="question-card card">
+            <p class="question-text">{{ question.question_text }}</p>
+            <div class="answer-options">
+                <label class="option-label">
+                    <input type="radio" name="answer" value="A">
+                    {{ question.option_a }}
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="B">
+                    {{ question.option_b }}
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="C">
+                    {{ question.option_c }}
+                </label>
+                <label class="option-label">
+                    <input type="radio" name="answer" value="D">
+                    {{ question.option_d }}
+                </label>
+            </div>
+            <div class="question-actions">
+                <button class="skip-button" id="skip-btn">Skip Question</button>
+                <button class="submit-answer-button" id="submit-btn">Submit Answer</button>
+            </div>
+            <div class="feedback-message" style="display: none;"></div>
+        </div>
+    </section>
+
+    <!-- Right Sidebar: Statistics -->
+    <aside class="stats-sidebar card">
+        <div class="today-user-stats">
+            <h3>Your Progress</h3>
+            <p>Today's Score: <strong><span id="today-score">0</span></strong></p>
+            <p>Time Taken: <strong><span id="time-taken">00:00:00</span></strong></p>
+            <p>Quiz Status: <strong><span id="quiz-status">In Progress</span></strong></p>
+        </div>
+    </aside>
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentQuestionIndex = 0;
+    let userScore = 0;
+    let startTime = new Date();
+    let timerInterval;
+    const totalQuestions = 20;
+    const timeLimit = 30 * 60; // 30 minutes in seconds
+
+    const questionTextElement = document.querySelector('.question-text');
+    const answerOptionsDiv = document.querySelector('.answer-options');
+    const submitButton = document.getElementById('submit-btn');
+    const skipButton = document.getElementById('skip-btn');
+    const feedbackMessage = document.querySelector('.feedback-message');
+    const currentQuestionNumberSpan = document.getElementById('current-question-number');
+    const todayScoreSpan = document.getElementById('today-score');
+    const timeTakenSpan = document.getElementById('time-taken');
+    const quizStatusSpan = document.getElementById('quiz-status');
+
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function updateTimer() {
+        const elapsedSeconds = Math.floor((new Date() - startTime) / 1000);
+        timeTakenSpan.textContent = formatTime(elapsedSeconds);
+        
+        if (elapsedSeconds >= timeLimit) {
+            clearInterval(timerInterval);
+            endQuiz();
+        }
+    }
+
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        userScore = 0;
+        startTime = new Date();
+        timerInterval = setInterval(updateTimer, 1000);
+        quizStatusSpan.textContent = "In Progress";
+        todayScoreSpan.textContent = "0";
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentQuestionIndex < totalQuestions) {
+            fetch(`/quiz/question/${currentQuestionIndex + 1}/`)
+                .then(response => response.json())
+                .then(data => {
+                    questionTextElement.textContent = data.question_text;
+                    answerOptionsDiv.innerHTML = `
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="A">
+                            ${data.option_a}
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="B">
+                            ${data.option_b}
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="C">
+                            ${data.option_c}
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="answer" value="D">
+                            ${data.option_d}
+                        </label>
+                    `;
+                    currentQuestionNumberSpan.textContent = currentQuestionIndex + 1;
+                    feedbackMessage.style.display = 'none';
+                    feedbackMessage.textContent = '';
+                    submitButton.disabled = false;
+                    skipButton.disabled = false;
+                });
+        } else {
+            endQuiz();
+        }
+    }
+
+    function submitAnswer() {
+        const selectedOption = document.querySelector('input[name="answer"]:checked');
+        if (!selectedOption) {
+            feedbackMessage.textContent = "Please select an answer!";
+            feedbackMessage.style.display = 'block';
+            feedbackMessage.style.color = '#dc3545';
+            return;
+        }
+
+        fetch('/quiz/submit-answer/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                question_index: currentQuestionIndex,
+                answer: selectedOption.value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.correct) {
+                userScore += 1;
+                feedbackMessage.textContent = "Correct! +1 point";
+                feedbackMessage.style.color = '#28a745';
+            } else {
+                feedbackMessage.textContent = `Wrong! Correct answer was: ${data.correct_answer}`;
+                feedbackMessage.style.color = '#dc3545';
+            }
+            feedbackMessage.style.display = 'block';
+            todayScoreSpan.textContent = userScore;
+
+            submitButton.disabled = true;
+            skipButton.disabled = true;
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 1500);
+        });
+    }
+
+    function skipQuestion() {
+        fetch('/quiz/skip-question/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                question_index: currentQuestionIndex
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            feedbackMessage.textContent = `Question skipped. Correct answer was: ${data.correct_answer}`;
+            feedbackMessage.style.color = '#ffc107';
+            feedbackMessage.style.display = 'block';
+            submitButton.disabled = true;
+            skipButton.disabled = true;
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                loadQuestion();
+            }, 1500);
+        });
+    }
+
+    function endQuiz() {
+        clearInterval(timerInterval);
+        quizStatusSpan.textContent = "Completed!";
+        feedbackMessage.textContent = `Quiz Finished! Your final score: ${userScore}/${totalQuestions}`;
+        feedbackMessage.style.color = '#4a90e2';
+        feedbackMessage.style.display = 'block';
+        submitButton.style.display = 'none';
+        skipButton.style.display = 'none';
+        
+        // Submit final results
+        fetch('/quiz/submit-quiz/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                score: userScore,
+                time_taken: Math.floor((new Date() - startTime) / 1000)
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.redirect_url) {
+                window.location.href = data.redirect_url;
+            }
+        });
+    }
+
+    submitButton.addEventListener('click', submitAnswer);
+    skipButton.addEventListener('click', skipQuestion);
+
+    startQuiz();
+});
+</script>
+{% endblock %} 

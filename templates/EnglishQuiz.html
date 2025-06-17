@@ -1,0 +1,476 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Quiz | UTESocialMedia</title>
+    <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
+    <link rel="stylesheet" href="{% static 'new_css/english_quiz_style.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="/">UTESocialMedia</a>
+            </div>
+            <div class="search-bar">
+                <form action="/search" method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="username" placeholder="Tìm kiếm người dùng...">
+                    <button type="submit"><i class="fa fa-search"></i></button>
+                </form>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="/"><i class="fa fa-home"></i> Trang chủ</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
+                    <li><a href="{% url 'create_group' %}"><i class="fa fa-users"></i> Tạo nhóm</a></li>
+                    <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li><a href="{% url 'quiz:daily_questions' %}"><i class="fa fa-question-circle"></i> English Quiz</a></li>
+                    <li class="profile-menu">
+                        <a href="#">
+                            {% if user_profile.profileimg %}
+                                <img src="{{ user_profile.profileimg.url }}" alt="Profile" class="profile-img">
+                            {% else %}
+                                <img src="{% static 'images/blank_avtar_image.png' %}" alt="Profile" class="profile-img">
+                            {% endif %}
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="/profile/{{user_profile.user.username}}"><i class="fa fa-user"></i> Trang cá nhân</a></li>
+                                <li><a href="/settings"><i class="fa fa-cog"></i> Quản lý tài khoản</a></li>
+                                <li><a href="logout"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container content-area">
+        <!-- Left Sidebar: User Information -->
+        <aside class="user-info-sidebar card">
+            <h3>My Profile</h3>
+            <div class="user-profile-summary">
+                {% if user_profile.profileimg %}
+                    <img src="{{ user_profile.profileimg.url }}" alt="{{user_profile.user.username}} Profile" class="profile-pic-small">
+                {% else %}
+                    <img src="{% static 'images/blank_avtar_image.png' %}" alt="{{user_profile.user.username}} Profile" class="profile-pic-small">
+                {% endif %}
+                <h4>{{user_profile.user.username}}</h4>
+                <p class="user-status">Active Participant</p>
+                <div class="user-score-overall">
+                    <span>Overall Score: <strong>{{user_profile.total_score|default:"0"}}</strong></span>
+                    <span>Badges: <strong>{{user_badges.count}}</strong></span>
+                </div>
+            </div>
+            <div class="quick-links">
+                <ul>
+                    <li><a href="{% url 'quiz:quiz_history' %}">My Quiz History</a></li>
+                    <li><a href="{% url 'quiz:leaderboard' %}">Leaderboards</a></li>
+                    <li><a href="{% url 'quiz:achievements' %}">Achievements</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <section class="newsfeed" style="width:100%;max-width:900px;margin:0 auto;">
+            <div class="quiz-page-content">
+                <!-- Main Quiz Section -->
+                <div class="main-quiz-section">
+                    <div class="card quiz-overview" id="quizOverview">
+                        <h2>Today's English Quiz</h2>
+                        <div class="quiz-details">
+                            <p><strong>Total Questions:</strong> <span>{{ total_questions }}</span></p>
+                            <p><strong>Time Limit:</strong> <span>60 minutes</span></p>
+                        </div>
+                        
+                        {% if has_attempted_today %}
+                            <div class="quiz-message">
+                                <div class="message-box">
+                                    <i class="fa fa-info-circle"></i>
+                                    <p>You have already completed today's quiz. Please come back tomorrow for a new set of questions!</p>
+                                </div>
+                                <div class="today-stats">
+                                    <h4>Today's Results</h4>
+                                    <p><strong>Score:</strong> {{ user_score|default:"0" }}/{{ total_questions }}</p>
+                                    <p><strong>Time Taken:</strong> {{ time_taken|default:"0" }} minutes</p>
+                                    <p><strong>Daily Rank:</strong> {{ daily_rank|default:"-" }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="quiz-actions">
+                                <button class="btn-primary" onclick="startQuiz()">Start Quiz</button>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card question-card" id="questionCard" style="display: none;">
+                        <div class="question-header">
+                            <div class="question-number">Question <span id="currentQuestionNumber">1</span> of {{ total_questions }}</div>
+                            <div class="timer" id="timer">Time: 10:00</div>
+                        </div>
+                        
+                        <div class="question-content">
+                            <h3 id="questionText">Loading question...</h3>
+                            <div class="options" id="options">
+                                {% for question in questions %}
+                                <div class="question-container" style="display: none;" data-question-id="{{ question.id }}">
+                                    <div class="option">
+                                        <input type="radio" name="answer" id="optionA{{ question.id }}" value="A" onchange="selectAnswer('A')">
+                                        <label for="optionA{{ question.id }}">A. {{ question.option_a }}</label>
+                                    </div>
+                                    <div class="option">
+                                        <input type="radio" name="answer" id="optionB{{ question.id }}" value="B" onchange="selectAnswer('B')">
+                                        <label for="optionB{{ question.id }}">B. {{ question.option_b }}</label>
+                                    </div>
+                                    <div class="option">
+                                        <input type="radio" name="answer" id="optionC{{ question.id }}" value="C" onchange="selectAnswer('C')">
+                                        <label for="optionC{{ question.id }}">C. {{ question.option_c }}</label>
+                                    </div>
+                                    <div class="option">
+                                        <input type="radio" name="answer" id="optionD{{ question.id }}" value="D" onchange="selectAnswer('D')">
+                                        <label for="optionD{{ question.id }}">D. {{ question.option_d }}</label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="question-actions">
+                            <button class="btn btn-secondary" id="skipBtn" onclick="skipQuestion()">Skip</button>
+                            <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()" disabled>Submit</button>
+                            <button class="btn btn-success" id="nextBtn" onclick="nextQuestion()" style="display: none;">Next</button>
+                            <button class="btn btn-danger" id="finishBtn" onclick="finishQuiz()" style="display: none;">Finish Quiz</button>
+                        </div>
+                        <div id="feedback" class="feedback" style="display: none;"></div>
+                    </div>
+
+                    <div class="card quiz-results" id="quizResults" style="display: none;">
+                        <h2>Quiz Results</h2>
+                        <div class="results-content">
+                            <p><strong>Final Score:</strong> <span id="finalScore">0</span>/{{ total_questions }}</p>
+                            <p><strong>Time Taken:</strong> <span id="timeTaken">0:00</span></p>
+                            <p><strong>Correct Answers:</strong> <span id="correctAnswers">0</span></p>
+                            <p><strong>Skipped Questions:</strong> <span id="skippedQuestions">0</span></p>
+                            <p><strong>Your Rank:</strong> <span id="rank">-</span></p>
+                        </div>
+                        <div class="results-actions">
+                            <button class="btn btn-primary" onclick="location.reload()">Try Again</button>
+                            <button class="btn btn-secondary" onclick="window.location.href='/'">Back to Home</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Sidebar -->
+                <div class="stats-sidebar">
+                    <div class="card">
+                        <h3>Daily Ranking</h3>
+                        <div class="leaderboard-list">
+                            {% for attempt in top_attempts %}
+                            <div class="leaderboard-item">
+                                <span class="rank">{{ forloop.counter }}</span>
+                                <span class="username">{{ attempt.user.username }}</span>
+                                <span class="score">{{ attempt.score }}/20</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Your Stats</h3>
+                        <div class="today-user-stats">
+                            <p><strong>Today's Score:</strong> <span>{{ user_score|default:"0" }}/20</span></p>
+                            <p><strong>Time Taken:</strong> <span>{{ time_taken|default:"0" }} minutes</span></p>
+                            <p><strong>Daily Rank:</strong> <span>{{ daily_rank|default:"-" }}</span></p>
+                            <p><strong>Status:</strong> <span>{{ quiz_status|default:"Not Started" }}</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 UTESocialMedia. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+    let currentQuestionIndex = 0;
+    let startTime;
+    let timerInterval;
+    let selectedAnswer = null;
+    let totalQuestions = parseInt("{{ total_questions }}");
+    let questions = [
+        {% for question in questions %}
+        {
+            id: "{{ question.id }}",
+            text: "{{ question.question_text }}",
+            options: [
+                "{{ question.option_a }}",
+                "{{ question.option_b }}",
+                "{{ question.option_c }}",
+                "{{ question.option_d }}"
+            ],
+            correctAnswer: "{{ question.correct_answer }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    // Track quiz state
+    let skippedQuestions = [];
+    let answeredQuestions = new Map(); // Map of question ID to answer
+    let isRollbackMode = false;
+    let rollbackIndex = 0;
+    let timeRemaining = 10 * 60; // 10 minutes in seconds
+
+    function startQuiz() {
+        document.getElementById('quizOverview').style.display = 'none';
+        document.getElementById('questionCard').style.display = 'block';
+        startTime = new Date();
+        startTimer();
+        loadQuestion(0);
+    }
+
+    function startTimer() {
+        const timerElement = document.getElementById('timer');
+        if (!timerElement) return;
+        
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerElement.textContent = `Time: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Add warning class when less than 2 minutes remaining
+            if (timeRemaining <= 120) {
+                timerElement.classList.add('warning');
+            }
+            
+            // Auto-submit when time runs out
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                finishQuiz();
+            }
+        }, 1000);
+    }
+
+    function loadQuestion(index) {
+        if (isRollbackMode) {
+            if (rollbackIndex >= skippedQuestions.length) {
+                finishQuiz();
+                return;
+            }
+            const question = skippedQuestions[rollbackIndex];
+            displayQuestion(question, rollbackIndex);
+            return;
+        }
+
+        if (index >= questions.length) {
+            if (skippedQuestions.length > 0) {
+                startRollbackMode();
+                return;
+            }
+            finishQuiz();
+            return;
+        }
+
+        const question = questions[index];
+        displayQuestion(question, index);
+    }
+
+    function displayQuestion(question, index) {
+        // Hide all question containers first
+        document.querySelectorAll('.question-container').forEach(container => {
+            container.style.display = 'none';
+        });
+
+        document.getElementById('questionText').textContent = question.text;
+        document.getElementById('currentQuestionNumber').textContent = index + 1;
+
+        // Show current question container
+        const currentContainer = document.querySelector(`[data-question-id="${question.id}"]`);
+        if (currentContainer) {
+            currentContainer.style.display = 'block';
+        }
+
+        // Reset UI state
+        document.getElementById('submitBtn').style.display = 'inline-block';
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('nextBtn').style.display = 'none';
+        document.getElementById('feedback').style.display = 'none';
+        
+        // Reset radio buttons
+        document.querySelectorAll('input[name="answer"]').forEach(radio => {
+            radio.checked = false;
+            radio.disabled = false;
+        });
+
+        selectedAnswer = null;
+
+        // Update skip button text in rollback mode
+        const skipBtn = document.getElementById('skipBtn');
+        if (isRollbackMode) {
+            skipBtn.textContent = 'Skip (Final)';
+        } else {
+            skipBtn.textContent = 'Skip';
+        }
+    }
+
+    function startRollbackMode() {
+        isRollbackMode = true;
+        rollbackIndex = 0;
+        loadQuestion(0);
+    }
+
+    function selectAnswer(answer) {
+        selectedAnswer = answer;
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    function submitAnswer() {
+        if (!selectedAnswer) return;
+
+        const question = isRollbackMode ? skippedQuestions[rollbackIndex] : questions[currentQuestionIndex];
+        const formData = new FormData();
+        formData.append('answer', selectedAnswer);
+
+        fetch(`/quiz/submit/${question.id}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Store the answer
+                answeredQuestions.set(question.id, {
+                    answer: selectedAnswer,
+                    isCorrect: data.is_correct
+                });
+
+                // Show feedback
+                const feedback = document.getElementById('feedback');
+                feedback.style.display = 'block';
+                feedback.className = `feedback ${data.is_correct ? 'correct' : 'incorrect'}`;
+                feedback.innerHTML = data.is_correct 
+                    ? '<i class="fa fa-check"></i> Correct!' 
+                    : `<i class="fa fa-times"></i> Incorrect. The correct answer was ${data.correct_answer}`;
+
+                // Automatically move to next question after 1 second
+                setTimeout(() => {
+                    if (isRollbackMode) {
+                        rollbackIndex++;
+                    } else {
+                        currentQuestionIndex++;
+                    }
+                    loadQuestion(isRollbackMode ? rollbackIndex : currentQuestionIndex);
+                }, 1000);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while submitting your answer. Please try again.');
+        });
+    }
+
+    function nextQuestion() {
+        if (isRollbackMode) {
+            rollbackIndex++;
+            loadQuestion(rollbackIndex);
+        } else {
+            currentQuestionIndex++;
+            loadQuestion(currentQuestionIndex);
+        }
+    }
+
+    function skipQuestion() {
+        const currentQuestion = isRollbackMode ? skippedQuestions[rollbackIndex] : questions[currentQuestionIndex];
+        
+        if (!isRollbackMode) {
+            // Add to skipped questions if not in rollback mode
+            skippedQuestions.push(currentQuestion);
+        }
+        
+        if (isRollbackMode) {
+            rollbackIndex++;
+        } else {
+            currentQuestionIndex++;
+        }
+        
+        loadQuestion(isRollbackMode ? rollbackIndex : currentQuestionIndex);
+    }
+
+    function finishQuiz() {
+        clearInterval(timerInterval);
+        document.getElementById('questionCard').style.display = 'none';
+        document.getElementById('quizResults').style.display = 'block';
+        
+        // Calculate final score
+        const endTime = new Date();
+        const timeTaken = (endTime - startTime) / 1000 / 60; // in minutes
+        document.getElementById('timeTaken').textContent = formatTime(timeTaken);
+        
+        // Calculate correct answers
+        let correctAnswers = 0;
+        answeredQuestions.forEach((value) => {
+            if (value.isCorrect) correctAnswers++;
+        });
+        
+        document.getElementById('finalScore').textContent = correctAnswers;
+        document.getElementById('correctAnswers').textContent = correctAnswers;
+        document.getElementById('skippedQuestions').textContent = skippedQuestions.length;
+        document.getElementById('rank').textContent = '-';
+    }
+
+    function formatTime(minutes) {
+        const mins = Math.floor(minutes);
+        const secs = Math.round((minutes - mins) * 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+
+    <style>
+    .timer {
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .timer.warning {
+        color: #ff4444;
+        animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    </style>
+</body>
+</html> 

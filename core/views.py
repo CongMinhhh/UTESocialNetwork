@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost, FollowersCount, Group, Message, Product, ProductImage, Comment
+from .models import Profile, Post, LikePost, FollowersCount, Group, Message, Product, ProductImage, Comment, GroupMember, Quiz, QuizAttempt, UserBadge, Question, Badge
 from itertools import chain
 import random
 from django.db import models
@@ -11,7 +11,19 @@ from django.db.models import Q
 from django.contrib.auth.hashers import check_password
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404
-from datetime import datetime
+from datetime import datetime, timedelta
+from django.utils import timezone
+import json
+from django.db.models import Avg, Count
+import openai
+from django.conf import settings
+from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline, set_seed
+import re
+import logging
+from django.views.decorators.csrf import csrf_exempt
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 
@@ -45,12 +57,16 @@ def index(request):
     # Sắp xếp lại theo thời gian tạo
     feed_list.sort(key=lambda x: x.created_at, reverse=True)
 
-    # Get all unique usernames from posts
+    # Get all unique usernames from posts and comments
     post_usernames = set(post.user for post in feed_list)
+    comment_usernames = set()
+    for post in feed_list:
+        comment_usernames.update(comment.user.username for comment in post.comments.all())
+    all_usernames = post_usernames.union(comment_usernames)
     
-    # Get profiles for all users who have posts
+    # Get profiles for all users who have posts or comments
     profiles = {}
-    for username in post_usernames:
+    for username in all_usernames:
         try:
             user = User.objects.get(username=username)
             profile = Profile.objects.get(user=user)
@@ -169,12 +185,20 @@ def like_post(request):
         new_like.save()
         post.no_of_likes = post.no_of_likes+1
         post.save()
-        return redirect('/')
+        return JsonResponse({
+            'status': 'success',
+            'liked': True,
+            'likes_count': post.no_of_likes
+        })
     else:
         like_filter.delete()
         post.no_of_likes = post.no_of_likes-1
         post.save()
-        return redirect('/')
+        return JsonResponse({
+            'status': 'success',
+            'liked': False,
+            'likes_count': post.no_of_likes
+        })
 
 @login_required(login_url='signin')
 def profile(request, pk):
@@ -761,3 +785,480 @@ def share_to_profile(request, post_id):
         'status': 'error',
         'message': 'Phương thức không được hỗ trợ'
     }, status=405)
+
+@login_required(login_url='signin')
+def group_chat(request, group_id):
+    group = get_object_or_404(Group, id=group_id)
+    user_profile = Profile.objects.get(user=request.user)
+    
+    # Check if user is a member of the group
+    is_member = GroupMember.objects.filter(group=group, user=request.user).exists()
+    if not is_member:
+        messages.error(request, 'Bạn phải là thành viên của nhóm để xem tin nhắn')
+        return redirect('group_detail', group_id=group_id)
+    
+    # Get group messages
+    messages = group.messages.all().order_by('created_at')
+    
+    # Mark messages as read
+    unread_messages = messages.exclude(is_read=request.user)
+    for message in unread_messages:
+        message.is_read.add(request.user)
+    
+    context = {
+        'group': group,
+        'user_profile': user_profile,
+        'messages': messages,
+    }
+    
+    return render(request, 'GroupChatPage.html', context)
+
+# Quiz Views
+def create_sample_quiz():
+    try:
+        # Create a new quiz for today
+        today = timezone.now().date()
+        quiz = Quiz.objects.create(
+            title=f"Daily English Quiz - {today}",
+            date=today,
+            is_active=True
+        )
+        
+        # Generate questions using AI
+        questions = []
+        try:
+            # Generate 20 questions at once
+            prompt = """Generate 20 English grammar and vocabulary questions in the following format:
+            Question: [question text]
+            A) [option A]
+            B) [option B]
+            C) [option C]
+            D) [option D]
+            Correct: [correct option letter]
+            Explanation: [brief explanation]
+            ---"""
+            
+            response = generator(prompt, max_length=2000, num_return_sequences=1)
+            generated_text = response[0]['generated_text']
+            
+            # Parse questions using regex
+            question_pattern = r"Question: (.*?)\nA\) (.*?)\nB\) (.*?)\nC\) (.*?)\nD\) (.*?)\nCorrect: ([A-D])\nExplanation: (.*?)(?=\n---|$)"
+            matches = re.finditer(question_pattern, generated_text, re.DOTALL)
+            
+            for match in matches:
+                question_text, option_a, option_b, option_c, option_d, correct_answer, explanation = match.groups()
+                questions.append({
+                    'text': question_text.strip(),
+                    'options': [option_a.strip(), option_b.strip(), option_c.strip(), option_d.strip()],
+                    'correct': correct_answer.strip(),
+                    'explanation': explanation.strip()
+                })
+            
+            # If we got enough questions, save them
+            if len(questions) >= 20:
+                for q in questions[:20]:  # Take only first 20 questions
+                    Question.objects.create(
+                        quiz=quiz,
+                        question_text=q['text'],
+                        option_a=q['options'][0],
+                        option_b=q['options'][1],
+                        option_c=q['options'][2],
+                        option_d=q['options'][3],
+                        correct_answer=q['correct'],
+                        explanation=q['explanation']
+                    )
+                return quiz
+            
+        except Exception as e:
+            logger.error(f"Error generating questions: {str(e)}")
+        
+        # If AI generation fails, create fallback questions
+        create_fallback_quiz(quiz)
+        return quiz
+        
+    except Exception as e:
+        logger.error(f"Error creating quiz: {str(e)}")
+        return None
+
+def create_fallback_quiz(quiz):
+    """Create a set of fallback questions if AI generation fails"""
+    fallback_questions = [
+        {
+            'text': 'What is the correct form of the verb in the sentence: "She _____ to the store yesterday."',
+            'options': ['go', 'goes', 'went', 'going'],
+            'correct': 'C',
+            'explanation': 'The past tense of "go" is "went".'
+        },
+        {
+            'text': 'Choose the correct article: "___ apple a day keeps the doctor away."',
+            'options': ['A', 'An', 'The', 'No article'],
+            'correct': 'B',
+            'explanation': 'We use "An" before words that start with a vowel sound.'
+        },
+        # Add more fallback questions here...
+    ]
+    
+    for q in fallback_questions:
+        Question.objects.create(
+            quiz=quiz,
+            question_text=q['text'],
+            option_a=q['options'][0],
+            option_b=q['options'][1],
+            option_c=q['options'][2],
+            option_d=q['options'][3],
+            correct_answer=q['correct'],
+            explanation=q['explanation']
+        )
+
+@login_required
+def quiz_home(request):
+    return redirect('quiz:daily_questions')
+
+@login_required(login_url='signin')
+def take_quiz(request, quiz_id):
+    quiz = Quiz.objects.get(id=quiz_id)
+    questions = Question.objects.filter(quiz=quiz)
+    
+    # Check if user has already attempted this quiz
+    if QuizAttempt.objects.filter(user=request.user, quiz=quiz).exists():
+        return redirect('quiz_results', quiz_id=quiz_id)
+    
+    # Get top attempts for the leaderboard
+    top_attempts = QuizAttempt.objects.filter(quiz=quiz).order_by('-score', 'completed_at')[:10]
+    
+    # Get user badges
+    user_badges = UserBadge.objects.filter(user=request.user)
+    
+    context = {
+        'user_profile': request.user.profile,
+        'quiz': quiz,
+        'question': questions.first(),  # First question to start with
+        'top_attempts': top_attempts,
+        'user_badges': user_badges,
+    }
+    return render(request, 'TakeQuiz.html', context)
+
+@login_required(login_url='signin')
+def quiz_results(request, quiz_id):
+    quiz = Quiz.objects.get(id=quiz_id)
+    attempt = QuizAttempt.objects.get(user=request.user, quiz=quiz)
+    questions = Question.objects.filter(quiz=quiz)
+    
+    # Get user's answers and create results
+    results = []
+    for question in questions:
+        user_answer = attempt.answers.get(str(question.id))
+        results.append({
+            'question': question,
+            'user_answer': user_answer,
+            'correct_answer': question.correct_answer,
+            'is_correct': user_answer == question.correct_answer
+        })
+    
+    context = {
+        'user_profile': request.user.profile,
+        'attempt': attempt,
+        'results': results,
+    }
+    return render(request, 'QuizResults.html', context)
+
+@login_required
+def get_question(request, question_index):
+    try:
+        # Get today's quiz
+        today = timezone.now().date()
+        quiz = Quiz.objects.filter(date=today, is_active=True).first()
+        
+        if not quiz:
+            # Create a new quiz if none exists for today
+            quiz = create_sample_quiz()
+        
+        # Get all questions for this quiz
+        questions = Question.objects.filter(quiz=quiz).order_by('id')
+        
+        if not questions.exists():
+            # Create fallback questions if none exist
+            create_fallback_quiz(quiz)
+            questions = Question.objects.filter(quiz=quiz).order_by('id')
+        
+        # Convert question_index to integer and validate
+        try:
+            question_index = int(question_index)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid question index'}, status=400)
+        
+        if question_index < 0 or question_index >= questions.count():
+            return JsonResponse({'error': 'Question index out of range'}, status=400)
+        
+        # Get the specific question
+        question = questions[question_index]
+        
+        # Format the response
+        question_data = {
+            'question_text': question.text,
+            'options': [
+                question.option1,
+                question.option2,
+                question.option3,
+                question.option4
+            ]
+        }
+        
+        return JsonResponse(question_data)
+        
+    except Exception as e:
+        logger.error(f"Error in get_question: {str(e)}")
+        return JsonResponse({'error': 'Internal server error'}, status=500)
+
+@login_required(login_url='signin')
+def submit_answer(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            question_index = data.get('question_index')
+            answer = data.get('answer')
+            
+            # Get today's quiz
+            today = timezone.now().date()
+            quiz = Quiz.objects.filter(date=today, is_active=True).first()
+            
+            if not quiz:
+                return JsonResponse({'error': 'No active quiz found'}, status=404)
+            
+            # Get the question
+            questions = Question.objects.filter(quiz=quiz).order_by('id')
+            if not questions.exists():
+                return JsonResponse({'error': 'No questions found'}, status=404)
+            
+            try:
+                question = questions[question_index]
+            except IndexError:
+                return JsonResponse({'error': 'Invalid question index'}, status=400)
+            
+            # Check if answer is correct
+            is_correct = str(answer) == str(question.correct_answer)
+            
+            # Get or create user's quiz attempt
+            user_object = User.objects.get(username=request.user.username)
+            attempt, created = QuizAttempt.objects.get_or_create(
+                quiz=quiz,
+                user=user_object,
+                defaults={'score': 0}
+            )
+            
+            # Update score if correct
+            if is_correct:
+                attempt.score += 1
+                attempt.save()
+            
+            return JsonResponse({
+                'correct': is_correct,
+                'correct_answer': question.correct_answer
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@login_required(login_url='signin')
+def skip_question(request, question_index):
+    if request.method == 'POST':
+        try:
+            # Get today's quiz
+            today = timezone.now().date()
+            quiz = Quiz.objects.filter(date=today, is_active=True).first()
+            
+            if not quiz:
+                return JsonResponse({'error': 'No active quiz found'}, status=404)
+            
+            # Get the question
+            questions = Question.objects.filter(quiz=quiz).order_by('id')
+            if not questions.exists():
+                return JsonResponse({'error': 'No questions found'}, status=404)
+            
+            try:
+                question = questions[int(question_index)]
+            except (IndexError, ValueError):
+                return JsonResponse({'error': 'Invalid question index'}, status=400)
+            
+            return JsonResponse({
+                'correct_answer': question.correct_answer
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@login_required(login_url='signin')
+def finish_quiz(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            time_taken = data.get('time_taken', 0)
+            
+            # Get today's quiz
+            today = timezone.now().date()
+            quiz = Quiz.objects.filter(date=today, is_active=True).first()
+            
+            if not quiz:
+                return JsonResponse({'error': 'No active quiz found'}, status=404)
+            
+            # Get user's attempt
+            user_object = User.objects.get(username=request.user.username)
+            attempt = QuizAttempt.objects.filter(quiz=quiz, user=user_object).first()
+            
+            if not attempt:
+                return JsonResponse({'error': 'No attempt found'}, status=404)
+            
+            # Update attempt with completion time
+            attempt.completed_at = timezone.now()
+            attempt.save()
+            
+            # Calculate rank
+            all_attempts = QuizAttempt.objects.filter(quiz=quiz).order_by('-score', 'completed_at')
+            rank = 1
+            for a in all_attempts:
+                if a.user == user_object:
+                    break
+                rank += 1
+            
+            return JsonResponse({
+                'score': attempt.score,
+                'time_taken': time_taken,
+                'correct_answers': attempt.score,
+                'rank': rank
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@login_required(login_url='signin')
+def submit_quiz(request):
+    """API endpoint to submit the entire quiz"""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        score = data.get('score')
+        time_taken = data.get('time_taken')
+        
+        quiz = Quiz.objects.get(date=timezone.now().date())
+        
+        # Create quiz attempt
+        attempt = QuizAttempt.objects.create(
+            user=request.user,
+            quiz=quiz,
+            score=score,
+            answers={}  # We'll store answers in a separate model if needed
+        )
+        
+        # Update user's total score
+        profile = request.user.profile
+        profile.total_score += score
+        profile.save()
+        
+        # Check for badges
+        check_and_award_badges(request.user)
+        
+        return JsonResponse({
+            'redirect_url': f'/quiz/results/{quiz.id}/'
+        })
+
+def check_and_award_badges(user):
+    """Check and award badges based on user's quiz performance"""
+    # Get user's quiz statistics
+    attempts = QuizAttempt.objects.filter(user=user)
+    total_attempts = attempts.count()
+    avg_score = attempts.aggregate(Avg('score'))['score__avg'] or 0
+    
+    # Define badge criteria
+    badge_criteria = {
+        'Quiz Master': {'min_attempts': 50, 'min_avg_score': 18},
+        'Perfect Score': {'min_perfect_scores': 1},
+        'Consistent Learner': {'min_attempts': 30, 'min_avg_score': 15},
+        'Quick Learner': {'min_attempts': 10, 'min_avg_score': 17},
+    }
+    
+    # Check each badge
+    for badge_name, criteria in badge_criteria.items():
+        badge = Badge.objects.get(name=badge_name)
+        
+        # Skip if user already has this badge
+        if UserBadge.objects.filter(user=user, badge=badge).exists():
+            continue
+        
+        # Check criteria
+        if badge_name == 'Perfect Score':
+            perfect_scores = attempts.filter(score=20).count()
+            if perfect_scores >= criteria['min_perfect_scores']:
+                UserBadge.objects.create(user=user, badge=badge)
+        else:
+            if (total_attempts >= criteria['min_attempts'] and 
+                avg_score >= criteria['min_avg_score']):
+                UserBadge.objects.create(user=user, badge=badge)
+
+@login_required(login_url='signin')
+def quiz_history(request):
+    """View for displaying user's quiz history"""
+    user_profile = request.user.profile
+    
+    # Get all quiz attempts for the user
+    quiz_history = QuizAttempt.objects.filter(
+        user=request.user
+    ).order_by('-completed_at')
+    
+    # Get user's badges
+    user_badges = UserBadge.objects.filter(user=request.user)
+    
+    context = {
+        'user_profile': user_profile,
+        'quiz_history': quiz_history,
+        'user_badges': user_badges,
+    }
+    return render(request, 'QuizResults.html', context)
+
+@login_required(login_url='signin')
+def leaderboard(request):
+    """View for displaying the quiz leaderboard"""
+    user_profile = request.user.profile
+    
+    # Get top attempts for all time
+    top_attempts = QuizAttempt.objects.select_related('user').order_by('-score', '-completed_at')[:50]
+    
+    # Get user's badges
+    user_badges = UserBadge.objects.filter(user=request.user)
+    
+    context = {
+        'user_profile': user_profile,
+        'top_attempts': top_attempts,
+        'user_badges': user_badges,
+    }
+    return render(request, 'EnglishQuiz.html', context)
+
+@login_required(login_url='signin')
+def achievements(request):
+    """View for displaying user's achievements and badges"""
+    user_profile = request.user.profile
+    
+    # Get all badges
+    all_badges = Badge.objects.all()
+    
+    # Get user's earned badges
+    user_badges = UserBadge.objects.filter(user=request.user)
+    
+    # Get user's quiz statistics
+    quiz_stats = QuizAttempt.objects.filter(user=request.user).aggregate(
+        total_attempts=Count('id'),
+        avg_score=Avg('score'),
+        perfect_scores=Count('id', filter=Q(score=20))
+    )
+    
+    context = {
+        'user_profile': user_profile,
+        'all_badges': all_badges,
+        'user_badges': user_badges,
+        'quiz_stats': quiz_stats,
+    }
+    return render(request, 'EnglishQuiz.html', context)

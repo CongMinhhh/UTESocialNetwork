@@ -1,0 +1,172 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'favicon.png' %}" rel="icon" type="image/png">
+    <title>{{ group.name }} - Group Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'new_css/group_chat_style.css' %}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="{% url 'home' %}" class="logo">UTE Social Network</a>
+            <nav>
+                <ul>
+                    <li><a href="{% url 'home' %}"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="{% url 'profile' %}"><i class="fas fa-user"></i> Profile</a></li>
+                    <li><a href="{% url 'messages' %}"><i class="fas fa-envelope"></i> Messages</a></li>
+                    <li><a href="{% url 'groups' %}"><i class="fas fa-users"></i> Groups</a></li>
+                    <li class="profile-menu">
+                        <a href="#" class="profile-link">
+                            <img src="{{ user.profile.profile_image.url }}" alt="Profile" class="profile-img">
+                        </a>
+                        <div class="profile-dropdown">
+                            <ul>
+                                <li><a href="{% url 'profile' %}"><i class="fas fa-user"></i> Profile</a></li>
+                                <li><a href="{% url 'settings' %}"><i class="fas fa-cog"></i> Settings</a></li>
+                                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </nav>
+
+    <!-- Messages Page Content -->
+    <div class="messages-page-content">
+        <div class="container messages-page-content">
+            <div class="messaging-container">
+                <!-- Contact List Sidebar -->
+                <div class="contact-list-sidebar">
+                    <div class="sidebar-header">
+                        <h3>Group Info</h3>
+                    </div>
+                    <div class="group-info">
+                        <p>{{ group.description }}</p>
+                        <div class="group-stats">
+                            <span><i class="fas fa-users"></i> {{ group.members.count }} members</span>
+                            <span><i class="fas fa-calendar"></i> Created {{ group.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="group-members">
+                        <h4>Group Members</h4>
+                        <ul class="contacts">
+                            {% for member in group.members.all %}
+                            <li class="contact-item">
+                                <img src="{{ member.profile.profile_image.url }}" alt="{{ member.username }}">
+                                <div class="contact-info">
+                                    <h4>{{ member.username }}</h4>
+                                    {% if member == group.admin %}
+                                    <p class="admin-badge">Admin</p>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Message Display Area -->
+                <div class="message-display-area">
+                    <div class="chat-header">
+                        <img src="{{ group.group_image.url }}" alt="{{ group.name }}">
+                        <h4>{{ group.name }}</h4>
+                    </div>
+                    <div class="messages-box" id="messages-box">
+                        {% for message in messages %}
+                        <div class="message {% if message.sender == user %}sent{% endif %}">
+                            <img src="{{ message.sender.profile.profile_image.url }}" alt="{{ message.sender.username }}">
+                            <div class="message-content">
+                                <p>{{ message.content }}</p>
+                                <span class="timestamp">{{ message.created_at|date:"g:i A" }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="message-input-area">
+                        <form id="message-form">
+                            <input type="text" class="message-input" id="message-input" placeholder="Type a message...">
+                            <button type="submit" class="send-button">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Profile dropdown functionality
+        document.querySelector('.profile-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector('.profile-dropdown').classList.toggle('active');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.profile-menu')) {
+                document.querySelector('.profile-dropdown').classList.remove('active');
+            }
+        });
+
+        // WebSocket connection
+        const groupId = '{{ group.id }}';
+        const ws_scheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const ws_path = `${ws_scheme}://${window.location.host}/ws/group_chat/${groupId}/`;
+        const chatSocket = new WebSocket(ws_path);
+
+        chatSocket.onopen = function(e) {
+            console.log('Successfully connected to group chat');
+        };
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const messagesBox = document.getElementById('messages-box');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${data.sender_id === {{ user.id }} ? 'sent' : ''}`;
+            
+            messageDiv.innerHTML = `
+                <img src="${data.sender_image}" alt="${data.sender_name}">
+                <div class="message-content">
+                    <p>${data.message}</p>
+                    <span class="timestamp">${data.timestamp}</span>
+                </div>
+            `;
+            
+            messagesBox.appendChild(messageDiv);
+            messagesBox.scrollTop = messagesBox.scrollHeight;
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        // Message form submission
+        document.getElementById('message-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+                messageInput.value = '';
+            }
+        });
+
+        // Scroll to bottom of messages box
+        const messagesBox = document.getElementById('messages-box');
+        messagesBox.scrollTop = messagesBox.scrollHeight;
+    </script>
+</body>
+</html> 

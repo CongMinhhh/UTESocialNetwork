@@ -1,0 +1,246 @@
+{% extends 'MainPage.html' %}
+{% load static %}
+
+{% block content %}
+<div class="results-container">
+    <div class="results-header">
+        <h1>Quiz Results</h1>
+        <div class="score-summary">
+            <div class="score-circle">
+                <span class="score">{{ attempt.score }}</span>
+                <span class="total">/20</span>
+            </div>
+            <div class="score-details">
+                <p>Completed on {{ attempt.completed_at|date:"F d, Y" }}</p>
+                <p>Time taken: {{ attempt.completed_at|time:"H:i" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-content">
+        {% for result in results %}
+        <div class="question-result {% if result.is_correct %}correct{% else %}incorrect{% endif %}">
+            <div class="question-header">
+                <span class="question-number">Question {{ forloop.counter }}</span>
+                <span class="result-indicator">
+                    {% if result.is_correct %}
+                    <i class="fa fa-check"></i> Correct
+                    {% else %}
+                    <i class="fa fa-times"></i> Incorrect
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="question-text">{{ result.question.question_text }}</div>
+            
+            <div class="options-review">
+                <div class="option {% if result.user_answer == 'A' %}selected{% endif %} {% if result.correct_answer == 'A' %}correct{% endif %}">
+                    <span class="option-label">A.</span>
+                    <span class="option-text">{{ result.question.option_a }}</span>
+                </div>
+                <div class="option {% if result.user_answer == 'B' %}selected{% endif %} {% if result.correct_answer == 'B' %}correct{% endif %}">
+                    <span class="option-label">B.</span>
+                    <span class="option-text">{{ result.question.option_b }}</span>
+                </div>
+                <div class="option {% if result.user_answer == 'C' %}selected{% endif %} {% if result.correct_answer == 'C' %}correct{% endif %}">
+                    <span class="option-label">C.</span>
+                    <span class="option-text">{{ result.question.option_c }}</span>
+                </div>
+                <div class="option {% if result.user_answer == 'D' %}selected{% endif %} {% if result.correct_answer == 'D' %}correct{% endif %}">
+                    <span class="option-label">D.</span>
+                    <span class="option-text">{{ result.question.option_d }}</span>
+                </div>
+            </div>
+
+            {% if result.question.explanation %}
+            <div class="explanation">
+                <h4>Explanation:</h4>
+                <p>{{ result.question.explanation }}</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="action-buttons">
+        <a href="{% url 'quiz:daily_questions' %}" class="btn btn-primary">Back to Quiz</a>
+        {% if attempt.score == 20 %}
+        <div class="perfect-score-badge">
+            <i class="fa fa-trophy"></i>
+            <span>Perfect Score!</span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.results-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.score-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.score-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 5px solid #007bff;
+}
+
+.score {
+    font-size: 3em;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.total {
+    font-size: 1.5em;
+    color: #6c757d;
+}
+
+.score-details {
+    text-align: left;
+}
+
+.question-result {
+    background: #fff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.question-result.correct {
+    border-left: 5px solid #28a745;
+}
+
+.question-result.incorrect {
+    border-left: 5px solid #dc3545;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.question-number {
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.result-indicator {
+    font-weight: 500;
+}
+
+.result-indicator i {
+    margin-right: 5px;
+}
+
+.correct .result-indicator {
+    color: #28a745;
+}
+
+.incorrect .result-indicator {
+    color: #dc3545;
+}
+
+.question-text {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+}
+
+.options-review {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.option {
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.option.selected {
+    background: #e9ecef;
+}
+
+.option.correct {
+    background: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.option-label {
+    font-weight: 500;
+    margin-right: 10px;
+    min-width: 25px;
+}
+
+.explanation {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.explanation h4 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: #fff;
+}
+
+.perfect-score-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffc107;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.perfect-score-badge i {
+    font-size: 1.5em;
+}
+</style>
+{% endblock %} 

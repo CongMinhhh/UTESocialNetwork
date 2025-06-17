@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views, group_views
 
 urlpatterns = [
@@ -43,4 +43,9 @@ urlpatterns = [
     path('marketplace/product/<int:product_id>/', views.product_detail, name='product_detail'),
     path('post/<str:post_id>/', views.post_detail, name='post_detail'),
     path('share-to-profile/<str:post_id>/', views.share_to_profile, name='share_to_profile'),
+    path('group/<uuid:group_id>/chat/', views.group_chat, name='group_chat'),
+    
+    # Quiz URLs
+    path('quiz/', include('quiz.urls')),
+    path('quiz-home/', views.quiz_home, name='quiz_home'),  # Redirect to quiz app
 ]

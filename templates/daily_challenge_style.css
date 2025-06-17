@@ -1,0 +1,570 @@
+/* General Body Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: #f0f2f5; /* Light grey background */
+    color: #333;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Navbar (reused from previous examples) */
+.navbar {
+    background-color: #ffffff;
+    padding: 15px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .logo {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4a90e2; /* Blue accent */
+}
+
+.navbar nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.navbar nav ul li {
+    margin-right: 25px;
+}
+
+.navbar nav ul li a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar nav ul li a:hover {
+    color: #4a90e2;
+}
+
+.search-bar input {
+    border: 1px solid #ddd;
+    padding: 8px 15px;
+    border-radius: 20px;
+    outline: none;
+    font-size: 14px;
+    width: 200px;
+}
+
+/* --- Daily Challenge Page Specific Styles --- */
+
+.daily-challenge-page-content {
+    display: flex;
+    gap: 20px;
+    padding: 30px 0;
+    align-items: flex-start; /* Align content to the top */
+}
+
+/* Card General Style */
+.card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+/* Left Sidebar: User Information */
+.user-info-sidebar {
+    flex: 1;
+    max-width: 280px;
+    position: sticky;
+    top: 20px;
+}
+
+.user-info-sidebar h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.user-profile-summary {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.user-profile-summary .profile-pic-small {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 3px solid #4a90e2;
+}
+
+.user-profile-summary h4 {
+    margin: 5px 0 0 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.user-profile-summary .user-status {
+    font-size: 13px;
+    color: #777;
+    margin-top: 5px;
+    margin-bottom: 15px;
+}
+
+.user-score-overall span {
+    display: block;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.user-score-overall strong {
+    color: #4a90e2;
+}
+
+.quick-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.quick-links ul li {
+    margin-bottom: 8px;
+}
+
+.quick-links ul li a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    display: block;
+    padding: 5px 0;
+    transition: color 0.3s ease;
+}
+
+.quick-links ul li a:hover {
+    color: #4a90e2;
+}
+
+/* Middle Section: Question Interface */
+.question-interface-middle {
+    flex: 2;
+    min-width: 450px; /* Ensure a decent width for questions */
+}
+
+.challenge-overview h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.challenge-details p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.challenge-details strong {
+    color: #333;
+}
+
+.challenge-details span {
+    color: #4a90e2;
+    font-weight: 600;
+}
+
+.current-question-status {
+    font-size: 15px;
+    color: #777;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 0;
+}
+
+.question-card {
+    text-align: center;
+    min-height: 250px; /* Ensure card has some height even without much content */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.question-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 25px;
+}
+
+.answer-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 30px;
+    text-align: left; /* Align options left within the card */
+}
+
+.option-label {
+    display: flex;
+    align-items: center;
+    background-color: #f9f9f9;
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    font-size: 16px;
+    color: #555;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.option-label:hover {
+    background-color: #eef7ff; /* Light blue on hover */
+    border-color: #4a90e2;
+}
+
+.option-label input[type="radio"] {
+    margin-right: 12px;
+    transform: scale(1.2);
+    accent-color: #4a90e2;
+}
+
+.question-actions {
+    display: flex;
+    justify-content: space-around;
+    gap: 15px;
+    margin-top: auto; /* Push actions to the bottom */
+}
+
+.submit-answer-button,
+.skip-button {
+    flex-grow: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.submit-answer-button {
+    background-color: #4a90e2;
+    color: #fff;
+}
+
+.submit-answer-button:hover {
+    background-color: #3a7bd2;
+}
+
+.submit-answer-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.skip-button {
+    background-color: #e0e0e0;
+    color: #555;
+}
+
+.skip-button:hover {
+    background-color: #d0d0d0;
+}
+
+.skip-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.feedback-message {
+    margin-top: 15px;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f0f0f0; /* Neutral background */
+}
+
+
+/* Right Sidebar: Statistics Table & Today's User Info */
+.statistics-sidebar {
+    flex: 1;
+    max-width: 320px;
+    position: sticky;
+    top: 20px;
+}
+
+.daily-ranking h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.daily-ranking table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+}
+
+.daily-ranking th,
+.daily-ranking td {
+    padding: 10px 5px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.daily-ranking th {
+    background-color: #f5f5f5;
+    color: #555;
+    font-weight: 600;
+}
+
+.daily-ranking tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.daily-ranking tbody tr:nth-child(odd) {
+    background-color: #fcfcfc;
+}
+
+.daily-ranking tbody tr:hover {
+    background-color: #eef7ff;
+}
+
+.daily-ranking tbody tr:nth-child(3) { /* Highlight 'You' row */
+    background-color: #d8eaff; /* Lighter blue */
+    font-weight: 600;
+    color: #333;
+}
+
+
+.today-user-stats h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.today-user-stats p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.today-user-stats strong {
+    color: #4a90e2;
+}
+
+.today-user-stats span {
+    font-weight: 600;
+}
+
+
+/* Footer (reused from previous examples) */
+.footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px 0;
+    text-align: center;
+    font-size: 14px;
+    margin-top: 30px;
+}
+
+.footer .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.footer ul li {
+    margin-left: 20px;
+}
+
+.footer ul li a {
+    text-decoration: none;
+    color: #ccc;
+    transition: color 0.3s ease;
+}
+
+.footer ul li a:hover {
+    color: #fff;
+}
+
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .daily-challenge-page-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .user-info-sidebar,
+    .question-interface-middle,
+    .statistics-sidebar {
+        max-width: 100%;
+        width: 100%;
+        position: static; /* Remove sticky on smaller screens */
+        top: auto;
+    }
+
+    .user-info-sidebar h3,
+    .challenge-overview h2,
+    .daily-ranking h3,
+    .today-user-stats h3 {
+        text-align: center;
+    }
+
+    .challenge-overview,
+    .question-card,
+    .daily-ranking,
+    .today-user-stats {
+        margin-bottom: 20px; /* Add space between stacked cards */
+    }
+
+    .daily-ranking table {
+        font-size: 14px; /* Adjust table font size */
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar .container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .navbar nav ul {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .navbar nav ul li {
+        margin: 0 10px 10px 10px;
+    }
+
+    .search-bar {
+        margin-top: 10px;
+    }
+
+    .footer .container {
+        flex-direction: column;
+    }
+
+    .footer ul {
+        margin-top: 10px;
+    }
+
+    .footer ul li {
+        margin: 0 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar .logo {
+        font-size: 20px;
+    }
+
+    .navbar nav ul li {
+        margin: 0 5px 10px 5px;
+    }
+
+    .search-bar input {
+        width: 150px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .user-info-sidebar h3,
+    .daily-ranking h3,
+    .today-user-stats h3 {
+        font-size: 18px;
+    }
+
+    .user-profile-summary h4 {
+        font-size: 16px;
+    }
+
+    .user-score-overall span,
+    .quick-links ul li a {
+        font-size: 13px;
+    }
+
+    .question-interface-middle {
+        min-width: auto; /* Allow it to shrink further */
+    }
+
+    .challenge-overview h2 {
+        font-size: 20px;
+    }
+
+    .challenge-details p,
+    .current-question-status {
+        font-size: 14px;
+    }
+
+    .question-text {
+        font-size: 18px;
+    }
+
+    .option-label {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+    .option-label input[type="radio"] {
+        transform: scale(1.1);
+        margin-right: 8px;
+    }
+
+    .submit-answer-button,
+    .skip-button {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    .daily-ranking table {
+        font-size: 12px;
+    }
+
+    .daily-ranking th,
+    .daily-ranking td {
+        padding: 8px 3px;
+    }
+
+    .today-user-stats p {
+        font-size: 14px;
+    }
+}

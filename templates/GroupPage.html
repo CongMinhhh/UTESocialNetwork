@@ -81,6 +81,11 @@
                             Tham gia nhóm
                         </button>
                     {% endif %}
+                    {% if is_member %}
+                        <a href="{% url 'group_chat' group.id %}" class="chat-button">
+                            <i class="fa fa-comments"></i> Chat
+                        </a>
+                    {% endif %}
                     {% if is_admin %}
                         <a href="{% url 'group_settings' group.id %}" class="invite-button">
                             Quản lý nhóm

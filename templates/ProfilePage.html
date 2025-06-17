@@ -135,8 +135,8 @@
                         <img src="{{post.image.url}}" alt="Post Image" class="post-image">
                     {% endif %}
                     <div class="post-actions">
-                        <a href="/like-post?post_id={{post.id}}" class="like-btn">
-                            <span><i class="fa fa-thumbs-up"></i> {{post.no_of_likes}} Likes</span>
+                        <a href="#" onclick="likePost('{{post.id}}'); return false;" class="like-btn" id="like-btn-{{post.id}}">
+                            <span><i class="fa fa-thumbs-up"></i> <span class="likes-count">{{post.no_of_likes}}</span> Likes</span>
                         </a>
                         <span><i class="fa fa-comment"></i> Bình luận</span>
                         <span><i class="fa fa-share"></i> Chia sẻ</span>
@@ -303,6 +303,33 @@
                 dropdown.classList.remove('active');
             });
         });
+
+        function likePost(postId) {
+            fetch(`/like-post?post_id=${postId}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const likeBtn = document.getElementById(`like-btn-${postId}`);
+                    const likesCount = likeBtn.querySelector('.likes-count');
+                    likesCount.textContent = data.likes_count;
+                    
+                    // Update the like button appearance
+                    if (data.liked) {
+                        likeBtn.classList.add('liked');
+                    } else {
+                        likeBtn.classList.remove('liked');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
     </script>
 </body>
 </html>

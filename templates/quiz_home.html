@@ -1,0 +1,104 @@
+{% load static %}
+
+<div class="quiz-home-content">
+    <h1>English Quiz</h1>
+    
+    <div class="quiz-overview card">
+        <h2>Today's Quiz</h2>
+        <div class="quiz-stats">
+            <p><strong>Total Questions:</strong> {{ total_questions }}</p>
+            <p><strong>Time Limit:</strong> 60 minutes</p>
+        </div>
+        
+        <div class="quiz-actions">
+            <a href="{% url 'daily_questions' %}" class="btn btn-primary">Start Today's Quiz</a>
+        </div>
+    </div>
+
+    <div class="quiz-features">
+        <div class="feature-card">
+            <i class="fa fa-trophy"></i>
+            <h3>Daily Challenge</h3>
+            <p>Test your English skills with new questions every day</p>
+        </div>
+        
+        <div class="feature-card">
+            <i class="fa fa-chart-line"></i>
+            <h3>Track Progress</h3>
+            <p>Monitor your improvement over time</p>
+        </div>
+        
+        <div class="feature-card">
+            <i class="fa fa-users"></i>
+            <h3>Compete</h3>
+            <p>Compare your scores with other students</p>
+        </div>
+    </div>
+</div>
+
+<style>
+.quiz-home-content {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.quiz-overview {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.quiz-stats {
+    margin: 1.5rem 0;
+}
+
+.quiz-actions {
+    margin-top: 1.5rem;
+}
+
+.quiz-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.feature-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.feature-card i {
+    font-size: 2rem;
+    color: #007bff;
+    margin-bottom: 1rem;
+}
+
+.feature-card h3 {
+    margin-bottom: 0.5rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+</style> 

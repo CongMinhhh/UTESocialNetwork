@@ -30,6 +30,7 @@
                     <li><a href="{% url 'messages' %}"><i class="fa fa-envelope"></i> Tin nhắn</a></li>
                     <li><a href="{% url 'create_group' %}"><i class="fa fa-users"></i> Tạo nhóm</a></li>
                     <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
+                    <li><a href="{% url 'quiz:daily_questions' %}"><i class="fa fa-question-circle"></i> English Quiz</a></li>
                     <li class="profile-menu">
                         <a href="#">
                             <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
@@ -101,6 +102,7 @@
         </aside>
 
         <section class="newsfeed">
+            {% block content %}
             <div class="create-post">
                 <a href="#" class="create-post-btn">
                     <textarea placeholder="Bạn đang nghĩ gì?" readonly></textarea>
@@ -178,8 +180,8 @@
                 {% endif %}
 
                 <div class="post-actions">
-                    <a href="/like-post?post_id={{post.id}}" class="like-btn">
-                        <span><i class="fa fa-thumbs-up"></i> {{post.no_of_likes}} Likes</span>
+                    <a href="#" onclick="likePost('{{post.id}}'); return false;" class="like-btn" id="like-btn-{{post.id}}">
+                        <span><i class="fa fa-thumbs-up"></i> <span class="likes-count">{{post.no_of_likes}}</span> Likes</span>
                     </a>
                     <button class="comment-btn" onclick="toggleComments('{{post.id}}')">
                         <i class="fa fa-comment"></i> Bình luận
@@ -283,6 +285,7 @@
                     </div>
                 </div>
             </div>
+            {% endblock %}
         </section>
 
         <aside class="sidebar-right">
@@ -577,6 +580,33 @@
             if (event.target == shareModal) {
                 closeShareModal();
             }
+        }
+
+        function likePost(postId) {
+            fetch(`/like-post?post_id=${postId}`, {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const likeBtn = document.getElementById(`like-btn-${postId}`);
+                    const likesCount = likeBtn.querySelector('.likes-count');
+                    likesCount.textContent = data.likes_count;
+                    
+                    // Update the like button appearance
+                    if (data.liked) {
+                        likeBtn.classList.add('liked');
+                    } else {
+                        likeBtn.classList.remove('liked');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
         }
     </script>
 </body>
