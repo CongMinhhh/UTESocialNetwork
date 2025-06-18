@@ -4,6 +4,7 @@ django-allauth==0.57.0
 django-environ==0.11.2
 django-crispy-forms==2.1
 crispy-bootstrap5==2023.10
+dj-database-url==2.1.0
 
 # --- Chat realtime (WebSocket) ---
 channels==4.0.0
@@ -13,7 +14,8 @@ daphne==4.0.0
 # --- Tải và lưu trữ ảnh ---
 Pillow==10.1.0
 django-storages==1.14.2
-boto3==1.34.11
+cloudinary==1.36.0
+django-cloudinary-storage==0.3.0
 
 # --- Web server ---
 whitenoise==6.6.0
@@ -27,5 +29,5 @@ python-dotenv==1.0.0
 schedule==1.2.1
 APScheduler==3.10.4
 
-# --- Database: Chọn MySQL hoặc PostgreSQL (cài 1 trong 2) ---
-mysqlclient>=2.2.4
+# --- Database: PostgreSQL for production ---
+psycopg2-binary==2.9.9
