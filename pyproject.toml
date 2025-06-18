@@ -1,0 +1,37 @@
+[project]
+name = "utesocialnetwork"
+version = "0.1.0"
+description = "A django social network project for student"
+authors = [
+    {name = "CongMinhhh", email = "Congminh.00000123@gmail.com"}
+]
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">=3.11"
+
+dependencies = [
+    "Django==4.2.7",
+    "django-allauth==0.57.0",
+    "django-environ==0.11.2",
+    "django-crispy-forms==2.1",
+    "crispy-bootstrap5==2023.10",
+    "dj-database-url==2.1.0",
+    "channels==4.0.0",
+    "channels-redis==4.1.0",
+    "daphne==4.0.0",
+    "Pillow==10.1.0",
+    "django-storages==1.14.2",
+    "cloudinary==1.36.0",
+    "django-cloudinary-storage==0.3.0",
+    "whitenoise==6.6.0",
+    "gunicorn==21.2.0",
+    "openai==1.12.0",
+    "python-dotenv==1.0.0",
+    "schedule==1.2.1",
+    "APScheduler==3.10.4",
+    "psycopg2-binary==2.9.9"
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
