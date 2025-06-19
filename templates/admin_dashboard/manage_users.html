@@ -1,0 +1,53 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-content">
+    <div class="section">
+        <h2>Quản lý người dùng</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên người dùng</th>
+                        <th>Email</th>
+                        <th>Ngày tham gia</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.date_joined|date:"d/m/Y" }}</td>
+                        <td>
+                            <span class="status-badge {% if user.is_active %}status-active{% else %}status-locked{% endif %}">
+                                {% if user.is_active %}Hoạt động{% else %}Đã khóa{% endif %}
+                            </span>
+                        </td>
+                        <td class="actions">
+                            {% if not user.is_staff %}
+                            <form method="POST" action="{% url 'toggle_user_status' user.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                                    {% if user.is_active %}Khóa{% else %}Mở khóa{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{% url 'delete_user' user.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn btn-danger delete-btn">Xóa</button>
+                            </form>
+                            {% else %}
+                            <span class="admin-badge">Admin</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

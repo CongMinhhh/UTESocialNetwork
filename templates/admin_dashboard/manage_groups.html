@@ -1,0 +1,51 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-content">
+    <div class="section">
+        <h2>Quản lý nhóm</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên nhóm</th>
+                        <th>Người tạo</th>
+                        <th>Ngày tạo</th>
+                        <th>Số thành viên</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in groups %}
+                    <tr>
+                        <td>{{ group.name }}</td>
+                        <td>{{ group.creator.username }}</td>
+                        <td>{{ group.created_at|date:"d/m/Y" }}</td>
+                        <td>{{ group.members.count }}</td>
+                        <td>
+                            <span class="status-badge {% if not group.is_locked %}status-active{% else %}status-locked{% endif %}">
+                                {% if not group.is_locked %}Hoạt động{% else %}Đã khóa{% endif %}
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <form method="POST" action="{% url 'toggle_group_status' group.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn {% if not group.is_locked %}btn-warning{% else %}btn-success{% endif %}">
+                                    {% if not group.is_locked %}Khóa{% else %}Mở khóa{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" action="{% url 'delete_group' group.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="action-btn btn-danger delete-btn">Xóa</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 

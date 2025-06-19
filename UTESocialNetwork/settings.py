@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'channels',
     'cloudinary',
     'cloudinary_storage',
+    'admin_dashboard',
 ]
 
 MIDDLEWARE = [

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, auth
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Profile, Post, LikePost, FollowersCount, Group, Message, Product, ProductImage, Comment, GroupMember, Quiz, QuizAttempt, UserBadge, Question, Badge
+from .models import Profile, Post, LikePost, FollowersCount, Group, Message, Product, ProductImage, Comment, GroupMember, Quiz, QuizAttempt, UserBadge, Question, Badge, GroupPost
 from itertools import chain
 import random
 from django.db import models
@@ -332,7 +332,6 @@ def signup(request):
         return render(request, 'SignUpPage.html')
 
 def signin(request):
-    
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -341,9 +340,12 @@ def signin(request):
 
         if user is not None:
             auth.login(request, user)
+            # Kiểm tra nếu là admin thì chuyển hướng đến trang admin
+            if user.is_staff:
+                return redirect('admin_dashboard')
             return redirect('/')
         else:
-            messages.info(request, 'Credentials Invalid')
+            messages.info(request, 'Thông tin đăng nhập không chính xác')
             return redirect('signin')
 
     else:
@@ -1262,3 +1264,27 @@ def achievements(request):
         'quiz_stats': quiz_stats,
     }
     return render(request, 'EnglishQuiz.html', context)
+
+@login_required(login_url='signin')
+def group_detail(request, group_id):
+    try:
+        group = Group.objects.get(id=group_id)
+        
+        # Kiểm tra nếu nhóm bị khóa và người dùng không phải admin
+        if group.is_locked and not request.user.is_staff:
+            messages.error(request, 'Nhóm này đã bị khóa bởi admin')
+            return redirect('/')
+            
+        # Tiếp tục xử lý logic hiện tại
+        is_member = group.members.filter(id=request.user.id).exists()
+        posts = GroupPost.objects.filter(group=group).order_by('-created_at')
+        
+        context = {
+            'group': group,
+            'is_member': is_member,
+            'posts': posts,
+        }
+        return render(request, 'GroupPage.html', context)
+    except Group.DoesNotExist:
+        messages.error(request, 'Không tìm thấy nhóm')
+        return redirect('/')

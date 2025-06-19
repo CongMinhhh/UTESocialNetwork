@@ -1,0 +1,94 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-section">
+    <h2>Quản lý bài viết</h2>
+    
+    <!-- Bộ lọc -->
+    <div class="filter-section">
+        <form method="get" class="filter-form">
+            <input type="text" name="search" placeholder="Tìm kiếm theo nội dung hoặc người đăng..." 
+                   value="{{ request.GET.search|default:'' }}" class="search-input">
+            <select name="sort" class="sort-select">
+                <option value="newest" {% if request.GET.sort == 'newest' %}selected{% endif %}>Mới nhất</option>
+                <option value="oldest" {% if request.GET.sort == 'oldest' %}selected{% endif %}>Cũ nhất</option>
+                <option value="most_likes" {% if request.GET.sort == 'most_likes' %}selected{% endif %}>Nhiều lượt thích nhất</option>
+            </select>
+            <button type="submit" class="filter-btn">Lọc</button>
+        </form>
+    </div>
+
+    <!-- Danh sách bài viết -->
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Người đăng</th>
+                    <th>Nội dung</th>
+                    <th>Hình ảnh</th>
+                    <th>Lượt thích</th>
+                    <th>Ngày đăng</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in posts %}
+                <tr>
+                    <td>{{ post.id }}</td>
+                    <td>{{ post.user }}</td>
+                    <td>{{ post.caption|truncatechars:100 }}</td>
+                    <td>
+                        {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="Post Image" class="thumbnail">
+                        {% else %}
+                        <span>Không có ảnh</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ post.no_of_likes }}</td>
+                    <td>{{ post.created_at|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <form method="post" action="{% url 'delete_post' post.id %}" 
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài viết này?');" 
+                                  style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="delete-btn">
+                                    <i class="fas fa-trash"></i> Xóa
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">Không có bài viết nào</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Phân trang -->
+    {% if posts.has_other_pages %}
+    <div class="pagination">
+        {% if posts.has_previous %}
+        <a href="?page={{ posts.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="page-link">&laquo;</a>
+        {% endif %}
+
+        {% for i in posts.paginator.page_range %}
+            {% if posts.number == i %}
+            <span class="page-link active">{{ i }}</span>
+            {% else %}
+            <a href="?page={{ i }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="page-link">{{ i }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if posts.has_next %}
+        <a href="?page={{ posts.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" class="page-link">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

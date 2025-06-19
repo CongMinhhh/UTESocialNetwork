@@ -71,6 +71,7 @@ class Group(models.Model):
     is_private = models.BooleanField(default=False)
     profile_image = models.ImageField(upload_to='group_profile_images', default='blank-group-picture.png')
     cover_photo = models.ImageField(upload_to='group_cover_photos', default='default-cover.jpg')
+    is_locked = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

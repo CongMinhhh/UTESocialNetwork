@@ -1,0 +1,122 @@
+{% extends 'admin_dashboard/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="dashboard-content">
+    <!-- Thống kê tổng quan -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Tổng số người dùng</h3>
+            <p class="stat-number">{{ total_users }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Tổng số bài viết</h3>
+            <p class="stat-number">{{ total_posts }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Tổng số nhóm</h3>
+            <p class="stat-number">{{ total_groups }}</p>
+        </div>
+    </div>
+
+    <!-- Người dùng mới -->
+    <div class="section">
+        <h2>Người dùng mới nhất</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên người dùng</th>
+                        <th>Email</th>
+                        <th>Ngày tham gia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in recent_users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.date_joined|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Bài viết mới -->
+    <div class="section">
+        <h2>Bài viết mới nhất</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Người đăng</th>
+                        <th>Nội dung</th>
+                        <th>Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in recent_posts %}
+                    <tr>
+                        <td>{{ post.user }}</td>
+                        <td>{{ post.caption|truncatechars:50 }}</td>
+                        <td>{{ post.created_at|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Nhóm hoạt động -->
+    <div class="section">
+        <h2>Nhóm hoạt động nhiều nhất</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên nhóm</th>
+                        <th>Số bài viết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in active_groups %}
+                    <tr>
+                        <td>{{ group.name }}</td>
+                        <td>{{ group.post_count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Logs gần đây -->
+    <div class="section">
+        <h2>Hoạt động gần đây</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Admin</th>
+                        <th>Hành động</th>
+                        <th>Đối tượng</th>
+                        <th>Thời gian</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in recent_logs %}
+                    <tr>
+                        <td>{{ log.admin.username }}</td>
+                        <td>{{ log.action }}</td>
+                        <td>{{ log.target }}</td>
+                        <td>{{ log.timestamp|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 
