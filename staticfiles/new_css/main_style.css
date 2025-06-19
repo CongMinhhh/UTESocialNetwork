@@ -333,21 +333,37 @@ body {
 /* Icon Styling */
 .fa {
     margin-right: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
 }
 
 /* Navigation Icons */
 .navbar nav ul li a .fa {
     font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
 }
 
 /* Post Actions Icons */
 .post-actions .fa {
     font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
 }
 
 /* Stats Icons */
 .stats .fa {
     color: #4a90e2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
 }
 
 /* Quick Links Icons */
@@ -355,13 +371,22 @@ body {
     width: 20px;
     text-align: center;
     color: #4a90e2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
 }
 
 /* Profile Dropdown Icons */
 .profile-dropdown .fa {
     width: 20px;
+    height: 35px;
     text-align: center;
     color: #666;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
 }
 
 /* Post Card */

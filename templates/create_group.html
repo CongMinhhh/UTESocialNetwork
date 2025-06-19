@@ -54,7 +54,7 @@
             <h1>Tạo nhóm mới</h1>
             <p class="subtitle">Tạo một nhóm mới để kết nối với những người có cùng sở thích.</p>
 
-            <form class="create-group-form" method="POST" enctype="multipart/form-data">
+            <form class="create-group-form" method="POST" enctype="multipart/form-data" id="createGroupForm">
                 {% csrf_token %}
                 
                 <div class="form-group cover-photo-group">
@@ -127,7 +127,6 @@
     <script src="{% static 'assets/js/uikit.js' %}"></script>
     <script src="{% static 'assets/js/simplebar.js' %}"></script>
     <script src="{% static 'assets/js/custom.js' %}"></script>
-    <script src="{% static '../../unpkg.com/ionicons%405.2.3/dist/ionicons.js' %}"></script>
 
     <script>
         // Preview uploaded images
@@ -147,6 +146,43 @@
 
         document.getElementById('cover_photo').addEventListener('change', function() {
             previewImage(this, 'coverPreview');
+        });
+
+        // Form submission handling
+        document.getElementById('createGroupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Đang tạo nhóm...';
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra khi tạo nhóm');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi tạo nhóm');
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Tạo nhóm';
+            });
         });
 
         // Profile dropdown

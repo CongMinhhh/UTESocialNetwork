@@ -7,6 +7,7 @@ from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
 from .models import Profile
+from django.urls import reverse
 
 @login_required
 def create_group(request):
@@ -20,33 +21,44 @@ def create_group(request):
         cover_photo = request.FILES.get('cover_photo')
 
         if Group.objects.filter(name=name).exists():
-            messages.error(request, 'Tên nhóm đã tồn tại')
-            return redirect('create_group')
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Tên nhóm đã tồn tại'
+            })
 
-        group = Group.objects.create(
-            name=name,
-            description=description,
-            admin=request.user,
-            is_private=is_private == 'true'
-        )
+        try:
+            group = Group.objects.create(
+                name=name,
+                description=description,
+                admin=request.user,
+                is_private=is_private == 'true'
+            )
 
-        # Handle avatar upload
-        if avatar:
-            group.profile_image = avatar
-            
-        # Handle cover photo upload
-        if cover_photo:
-            group.cover_photo = cover_photo
-            
-        group.save()
+            # Handle avatar upload
+            if avatar:
+                group.profile_image = avatar
+                
+            # Handle cover photo upload
+            if cover_photo:
+                group.cover_photo = cover_photo
+                
+            group.save()
 
-        GroupMember.objects.create(
-            group=group,
-            user=request.user
-        )
+            GroupMember.objects.create(
+                group=group,
+                user=request.user
+            )
 
-        messages.success(request, 'Tạo nhóm thành công!')
-        return redirect('group_detail', group_id=group.id)
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Tạo nhóm thành công!',
+                'redirect_url': reverse('group_detail', kwargs={'group_id': group.id})
+            })
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': str(e)
+            })
 
     return render(request, 'create_group.html', {'user_profile': user_profile})
 
