@@ -112,14 +112,22 @@ if os.getenv('CLOUDINARY_URL'):
 
 # Channels
 ASGI_APPLICATION = 'UTESocialNetwork.asgi.application'
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [os.getenv('REDIS_URL', 'redis://localhost:6379')],
+if DEBUG:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [os.environ.get("REDIS_URL")],
+            },
         },
-    },
-}
+    }
+
 
 # OpenAI (optional use)
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
