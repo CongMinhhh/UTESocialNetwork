@@ -32,11 +32,11 @@
                     <li><a href="{% url 'marketplace' %}"><i class="fa fa-shopping-cart"></i> Marketplace</a></li>
                     <li><a href="{% url 'quiz:daily_questions' %}"><i class="fa fa-question-circle"></i> English Quiz</a></li>
                     <li class="profile-menu">
-                        <a href="#">
+                        <a href="#" class="profile-trigger">
                             {% if user_profile.profileimg %}
-                                <img src="{{ user_profile.profileimg.url }}" alt="Profile" class="profile-img">
+                                <img src="{{user_profile.profileimg.url}}" alt="Profile" class="profile-img">
                             {% else %}
-                                <img src="{% static 'images/blank_avtar_image.png' %}" alt="Profile" class="profile-img">
+                                <img src="/media/profile_images/blank-profile-picture.png" alt="Profile" class="profile-img">
                             {% endif %}
                         </a>
                         <div class="profile-dropdown">
@@ -58,9 +58,9 @@
             <h3>My Profile</h3>
             <div class="user-profile-summary">
                 {% if user_profile.profileimg %}
-                    <img src="{{ user_profile.profileimg.url }}" alt="{{user_profile.user.username}} Profile" class="profile-pic-small">
+                    <img src="{{user_profile.profileimg.url}}" alt="{{user_profile.user.username}} Profile" class="profile-pic-small">
                 {% else %}
-                    <img src="{% static 'images/blank_avtar_image.png' %}" alt="{{user_profile.user.username}} Profile" class="profile-pic-small">
+                    <img src="/media/profile_images/blank-profile-picture.png" alt="{{user_profile.user.username}} Profile" class="profile-pic-small">
                 {% endif %}
                 <h4>{{user_profile.user.username}}</h4>
                 <p class="user-status">Active Participant</p>
@@ -453,6 +453,27 @@
         }
         return cookieValue;
     }
+
+    // Profile dropdown
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileTrigger = document.querySelector('.profile-trigger');
+        const profileDropdown = document.querySelector('.profile-dropdown');
+        
+        if (profileTrigger && profileDropdown) {
+            profileTrigger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                profileDropdown.classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!profileTrigger.contains(e.target) && !profileDropdown.contains(e.target)) {
+                    profileDropdown.classList.remove('active');
+                }
+            });
+        }
+    });
     </script>
 
     <style>

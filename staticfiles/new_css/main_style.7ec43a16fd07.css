@@ -15,42 +15,48 @@ body {
 /* Navbar */
 .navbar {
     background-color: #ffffff;
-    padding: 10px 0;
+    padding: 15px 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .navbar .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    height: 100%;
 }
 
 .navbar .logo {
     font-size: 24px;
     font-weight: 700;
+    color: #4a90e2; /* Blue accent */
 }
 
-.navbar .logo a {
-    color: #4a90e2;
+.navbar nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.navbar nav ul li {
+    margin-right: 25px;
+}
+
+.navbar nav ul li a {
     text-decoration: none;
+    color: #555;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    font-size: 14px;
+    white-space: nowrap;
+    padding: 8px 12px;
 }
 
-.search-bar {
-    flex: 0 1 400px;
-    margin: 0 20px;
-    display: flex;
-    align-items: center;
-}
-
-.search-bar form {
-    display: flex;
-    align-items: center;
-    width: 100%;
+.navbar nav ul li a:hover {
+    color: #4a90e2;
 }
 
 .search-bar input {
@@ -59,53 +65,7 @@ body {
     border-radius: 20px;
     outline: none;
     font-size: 14px;
-    width: 100%;
-}
-
-.search-bar button {
-    background: none;
-    border: none;
-    margin-left: -35px;
-    color: #666;
-    cursor: pointer;
-}
-
-.navbar nav ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    height: 100%;
-}
-
-.navbar nav ul li {
-    margin-right: 20px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-}
-
-.navbar nav ul li:last-child {
-    margin-right: 0;
-}
-
-.navbar nav ul li a {
-    text-decoration: none;
-    color: #555;
-    font-weight: 500;
-    transition: color 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 15px;
-    white-space: nowrap;
-    height: 100%;
-    padding: 0 10px;
-}
-
-.navbar nav ul li a:hover {
-    color: #4a90e2;
+    width: 200px;
 }
 
 /* Main Content Area */
@@ -565,12 +525,13 @@ body {
 .profile-dropdown {
     display: none;
     position: absolute;
-    right: 0;
     top: 100%;
-    background: white;
+    right: 0;
+    background: #fff;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    min-width: 200px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    padding: 8px 0;
     z-index: 1000;
     margin-top: 10px;
 }
@@ -581,15 +542,14 @@ body {
 
 .profile-dropdown ul {
     list-style: none;
-    padding: 8px 0;
     margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
 }
 
 .profile-dropdown ul li {
     margin: 0;
-    width: 100%;
 }
 
 .profile-dropdown ul li a {
@@ -598,18 +558,13 @@ body {
     align-items: center;
     gap: 10px;
     color: #333;
+    text-decoration: none;
     transition: background-color 0.2s;
     font-size: 14px;
 }
 
 .profile-dropdown ul li a:hover {
     background-color: #f5f5f5;
-    color: #4a90e2;
-}
-
-.profile-dropdown ul li a i {
-    color: #4a90e2;
-    width: 16px;
 }
 
 /* Modal Styles */
@@ -802,48 +757,35 @@ body {
 }
 
 @media (max-width: 768px) {
-    .navbar {
-        height: auto;
-        padding: 10px 0;
-    }
-    
     .navbar .container {
-        flex-wrap: wrap;
-        justify-content: center;
-        padding: 0 10px;
-    }
-    
-    .navbar .logo {
-        margin-bottom: 10px;
-        width: 100%;
+        flex-direction: column;
         text-align: center;
     }
-    
-    .search-bar {
-        order: 2;
-        flex: 1 1 100%;
-        margin: 10px 0;
-    }
-    
-    .navbar nav {
-        order: 3;
-        width: 100%;
-    }
-    
+
     .navbar nav ul {
+        margin-top: 15px;
         flex-wrap: wrap;
         justify-content: center;
-        gap: 10px;
     }
-    
+
     .navbar nav ul li {
-        margin: 0;
-        height: auto;
+        margin: 0 10px 10px 10px;
     }
-    
-    .navbar nav ul li a {
-        padding: 8px 12px;
-        font-size: 13px;
+
+    .search-bar {
+        margin-top: 10px;
+    }
+
+    .footer .container {
+        flex-direction: column;
+    }
+
+    .footer ul {
+        margin-top: 10px;
+    }
+
+    .footer ul li {
+        margin: 0 10px;
     }
 }
 
@@ -1394,89 +1336,5 @@ body {
     .comment-user-avatar {
         width: 20px;
         height: 20px;
-    }
-}
-
-/* Profile Menu & Dropdown */
-.navbar nav ul li.profile-menu {
-    position: relative;
-    margin-left: 10px;
-}
-
-.navbar nav ul li.profile-menu .profile-img {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    object-fit: cover;
-    cursor: pointer;
-    border: 2px solid #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.profile-dropdown {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 100%;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    min-width: 200px;
-    z-index: 1000;
-    margin-top: 10px;
-}
-
-.profile-dropdown.active {
-    display: block;
-}
-
-.profile-dropdown ul {
-    list-style: none;
-    padding: 8px 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-}
-
-.profile-dropdown ul li {
-    margin: 0;
-    width: 100%;
-}
-
-.profile-dropdown ul li a {
-    padding: 12px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #333;
-    transition: background-color 0.2s;
-    font-size: 14px;
-}
-
-.profile-dropdown ul li a:hover {
-    background-color: #f5f5f5;
-    color: #4a90e2;
-}
-
-.profile-dropdown ul li a i {
-    color: #4a90e2;
-    width: 16px;
-}
-
-/* Responsive adjustments for dropdown */
-@media (max-width: 768px) {
-    .profile-dropdown {
-        position: fixed;
-        top: auto;
-        right: 50%;
-        transform: translateX(50%);
-        margin-top: 5px;
-        width: 90%;
-        max-width: 300px;
-    }
-
-    .profile-dropdown ul li a {
-        padding: 15px 20px;
-        font-size: 15px;
     }
 }

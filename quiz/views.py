@@ -6,11 +6,17 @@ from django.views.decorators.http import require_POST
 from .models import EnglishQuestion, UserAnswer
 from .forms import QuizAnswerForm
 from .tasks import generate_daily_questions
+from django.contrib.auth.models import User
+from core.models import Profile
 
 # Create your views here.
 
 @login_required
 def daily_questions(request):
+    # Get user profile
+    user_object = User.objects.get(username=request.user.username)
+    user_profile = Profile.objects.get(user=user_object)
+    
     # Get today's date
     today = timezone.now().date()
     
@@ -224,7 +230,7 @@ def daily_questions(request):
     context = {
         'questions': questions,
         'total_questions': questions.count(),
-        'user_profile': request.user.profile,
+        'user_profile': user_profile,
         'has_attempted_today': has_attempted_today,
         'user_score': user_score,
         'time_taken': None,  # You can implement this based on your timing system

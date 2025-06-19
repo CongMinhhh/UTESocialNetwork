@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="{% static 'favicon.png' %}" rel="icon" type="image/png">
+    <link href="{% static 'assets/images/favicon.png' %}" rel="icon" type="image/png">
     <title>{{ group.name }} - UTE Social Network</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'new_css/main_style.css' %}">
@@ -121,7 +121,7 @@
                         {% if post.user.profile.profileimg %}
                             <img src="{{ post.user.profile.profileimg.url }}" alt="user">
                         {% else %}
-                            <img src="/media/profile_images/blank-profile-picture.png" alt="Default Profile">
+                            <img src="{% static 'images/resources/blank_avatar_image.png' %}" alt="Default Profile">
                         {% endif %}
                         <div>
                             <h4>{{ post.user.username }}</h4>
