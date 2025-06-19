@@ -14,7 +14,14 @@ if os.path.exists(env_path):
 
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'your-default-secret-key-for-dev')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+
+# ALLOWED_HOSTS
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'utesocialnetwork.onrender.com').split(',')
+
+# CSRF_TRUSTED_ORIGINS: phải có khi DEBUG=False và deploy
+CSRF_TRUSTED_ORIGINS = [
+    'https://utesocialnetwork.onrender.com'
+]
 
 # Application definition
 INSTALLED_APPS = [
