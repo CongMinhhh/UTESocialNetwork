@@ -86,7 +86,7 @@
                         <h2>Today's English Quiz</h2>
                         <div class="quiz-details">
                             <p><strong>Total Questions:</strong> <span>{{ total_questions }}</span></p>
-                            <p><strong>Time Limit:</strong> <span>60 minutes</span></p>
+                            <p><strong>Time Limit:</strong> <span>10 minutes</span></p>
                         </div>
                         
                         {% if has_attempted_today %}
@@ -207,25 +207,13 @@
     let timerInterval;
     let selectedAnswer = null;
     let totalQuestions = parseInt("{{ total_questions }}");
-    let questions = [
-        {% for question in questions %}
-        {
-            id: "{{ question.id }}",
-            text: "{{ question.question_text }}",
-            options: [
-                "{{ question.option_a }}",
-                "{{ question.option_b }}",
-                "{{ question.option_c }}",
-                "{{ question.option_d }}"
-            ],
-            correctAnswer: "{{ question.correct_answer }}"
-        }{% if not forloop.last %},{% endif %}
-        {% endfor %}
-    ];
+    
+    // Parse questions with proper decoding
+    let questions = JSON.parse(decodeURIComponent("{{ questions_json|escapejs }}"));
     
     // Track quiz state
     let skippedQuestions = [];
-    let answeredQuestions = new Map(); // Map of question ID to answer
+    let answeredQuestions = new Map();
     let isRollbackMode = false;
     let rollbackIndex = 0;
     let timeRemaining = 10 * 60; // 10 minutes in seconds
@@ -262,71 +250,47 @@
     }
 
     function loadQuestion(index) {
-        if (isRollbackMode) {
-            if (rollbackIndex >= skippedQuestions.length) {
-                finishQuiz();
-                return;
-            }
-            const question = skippedQuestions[rollbackIndex];
-            displayQuestion(question, rollbackIndex);
-            return;
-        }
-
-        if (index >= questions.length) {
-            if (skippedQuestions.length > 0) {
-                startRollbackMode();
-                return;
-            }
-            finishQuiz();
-            return;
-        }
-
-        const question = questions[index];
-        displayQuestion(question, index);
-    }
-
-    function displayQuestion(question, index) {
-        // Hide all question containers first
-        document.querySelectorAll('.question-container').forEach(container => {
-            container.style.display = 'none';
-        });
-
-        document.getElementById('questionText').textContent = question.text;
-        document.getElementById('currentQuestionNumber').textContent = index + 1;
-
-        // Show current question container
-        const currentContainer = document.querySelector(`[data-question-id="${question.id}"]`);
-        if (currentContainer) {
-            currentContainer.style.display = 'block';
-        }
-
-        // Reset UI state
-        document.getElementById('submitBtn').style.display = 'inline-block';
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('nextBtn').style.display = 'none';
-        document.getElementById('feedback').style.display = 'none';
+        if (index >= questions.length) return;
         
-        // Reset radio buttons
-        document.querySelectorAll('input[name="answer"]').forEach(radio => {
-            radio.checked = false;
-            radio.disabled = false;
+        const question = questions[index];
+        document.getElementById('currentQuestionNumber').textContent = index + 1;
+        document.getElementById('questionText').textContent = question.question_text;
+        
+        // Clear previous options
+        const optionsContainer = document.getElementById('options');
+        optionsContainer.innerHTML = '';
+        
+        // Create new option elements
+        const options = [
+            { value: 'A', text: question.option_a },
+            { value: 'B', text: question.option_b },
+            { value: 'C', text: question.option_c },
+            { value: 'D', text: question.option_d }
+        ];
+        
+        options.forEach(option => {
+            const div = document.createElement('div');
+            div.className = 'option';
+            
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'answer';
+            input.id = `option${option.value}${question.id}`;
+            input.value = option.value;
+            input.onchange = () => selectAnswer(option.value);
+            
+            const label = document.createElement('label');
+            label.htmlFor = `option${option.value}${question.id}`;
+            label.textContent = `${option.value}. ${option.text}`;
+            
+            div.appendChild(input);
+            div.appendChild(label);
+            optionsContainer.appendChild(div);
         });
-
+        
+        // Reset selected answer
         selectedAnswer = null;
-
-        // Update skip button text in rollback mode
-        const skipBtn = document.getElementById('skipBtn');
-        if (isRollbackMode) {
-            skipBtn.textContent = 'Skip (Final)';
-        } else {
-            skipBtn.textContent = 'Skip';
-        }
-    }
-
-    function startRollbackMode() {
-        isRollbackMode = true;
-        rollbackIndex = 0;
-        loadQuestion(0);
+        document.getElementById('submitBtn').disabled = true;
     }
 
     function selectAnswer(answer) {
@@ -337,7 +301,7 @@
     function submitAnswer() {
         if (!selectedAnswer) return;
 
-        const question = isRollbackMode ? skippedQuestions[rollbackIndex] : questions[currentQuestionIndex];
+        const question = questions[currentQuestionIndex];
         const formData = new FormData();
         formData.append('answer', selectedAnswer);
 
@@ -367,12 +331,8 @@
 
                 // Automatically move to next question after 1 second
                 setTimeout(() => {
-                    if (isRollbackMode) {
-                        rollbackIndex++;
-                    } else {
-                        currentQuestionIndex++;
-                    }
-                    loadQuestion(isRollbackMode ? rollbackIndex : currentQuestionIndex);
+                    currentQuestionIndex++;
+                    loadQuestion(currentQuestionIndex);
                 }, 1000);
             } else {
                 alert(data.message);
@@ -385,30 +345,18 @@
     }
 
     function nextQuestion() {
-        if (isRollbackMode) {
-            rollbackIndex++;
-            loadQuestion(rollbackIndex);
-        } else {
-            currentQuestionIndex++;
-            loadQuestion(currentQuestionIndex);
-        }
+        currentQuestionIndex++;
+        loadQuestion(currentQuestionIndex);
     }
 
     function skipQuestion() {
-        const currentQuestion = isRollbackMode ? skippedQuestions[rollbackIndex] : questions[currentQuestionIndex];
+        const currentQuestion = questions[currentQuestionIndex];
         
-        if (!isRollbackMode) {
-            // Add to skipped questions if not in rollback mode
-            skippedQuestions.push(currentQuestion);
-        }
+        skippedQuestions.push(currentQuestion);
         
-        if (isRollbackMode) {
-            rollbackIndex++;
-        } else {
-            currentQuestionIndex++;
-        }
+        currentQuestionIndex++;
         
-        loadQuestion(isRollbackMode ? rollbackIndex : currentQuestionIndex);
+        loadQuestion(currentQuestionIndex);
     }
 
     function finishQuiz() {
