@@ -16,8 +16,8 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'your-default-secret-key-for-dev')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # ALLOWED_HOSTS
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
-# ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'utesocialnetwork.onrender.com').split(',')
+# ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'utesocialnetwork.onrender.com').split(',')
 
 # CSRF_TRUSTED_ORIGINS: phải có khi DEBUG=False và deploy
 CSRF_TRUSTED_ORIGINS = [
