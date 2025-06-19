@@ -13,17 +13,20 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
-from core.routing import websocket_urlpatterns  # ✅ Import routing chuẩn
 
+# ✅ Đặt trước mọi import liên quan Django ORM
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'UTESocialNetwork.settings')
 django.setup()
+
+# ✅ Import sau khi đã setup Django
+from core.routing import websocket_urlpatterns
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter(
-                websocket_urlpatterns  # ✅ Dùng pattern từ file routing
+                websocket_urlpatterns
             )
         )
     ),
