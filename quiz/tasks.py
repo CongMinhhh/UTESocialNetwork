@@ -423,12 +423,12 @@ def generate_daily_questions():
 
         # Bulk create all questions
         if created_questions:
-            EnglishQuestion.objects.bulk_create(created_questions)
+        EnglishQuestion.objects.bulk_create(created_questions)
             logger.info(f"Successfully created {len(created_questions)} questions for {today}")
-            return len(created_questions)
+        return len(created_questions)
         else:
             logger.error("No valid questions were created")
-            return 0
+        return 0
 
     except Exception as e:
         logger.error(f"Error generating questions: {e}")
