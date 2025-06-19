@@ -23,6 +23,8 @@ def daily_questions(request):
     
     # Get today's date
     today = timezone.now().date()
+    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timezone.timedelta(days=1)
     
     # Query questions created today
     questions = EnglishQuestion.objects.filter(created_date=today)
@@ -52,9 +54,47 @@ def daily_questions(request):
     # Convert to JSON with proper encoding
     questions_json = json.dumps(questions_data, cls=DjangoJSONEncoder, ensure_ascii=False)
     
-    # Check if user has attempted today's quiz by looking at answer_time
-    today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
-    today_end = today_start + timezone.timedelta(days=1)
+    # Get today's attempts and calculate rankings
+    today_attempts = UserAnswer.objects.filter(
+        answer_time__gte=today_start,
+        answer_time__lt=today_end
+    )
+    
+    # Group attempts by user and calculate scores
+    user_scores = {}
+    for attempt in today_attempts:
+        if attempt.user not in user_scores:
+            user_scores[attempt.user] = {
+                'correct_answers': 0,
+                'completion_time': attempt.completion_time,
+                'username': attempt.user.username,
+                'profile': Profile.objects.get(user=attempt.user)
+            }
+        if attempt.is_correct:
+            user_scores[attempt.user]['correct_answers'] += 1
+    
+    # Convert to list and sort by score and completion time
+    rankings = [
+        {
+            'username': data['username'],
+            'score': data['correct_answers'],
+            'completion_time': data['completion_time'],
+            'profile': data['profile']
+        }
+        for user, data in user_scores.items()
+    ]
+    rankings.sort(key=lambda x: (-x['score'], x['completion_time']))
+    
+    # Get user's rank if they've attempted today
+    user_rank = None
+    user_score = None
+    user_time = None
+    for i, rank in enumerate(rankings, 1):
+        if rank['username'] == request.user.username:
+            user_rank = i
+            user_score = rank['score']
+            user_time = rank['completion_time']
+            break
     
     context = {
         'user_profile': user_profile,
@@ -66,6 +106,10 @@ def daily_questions(request):
             answer_time__gte=today_start,
             answer_time__lt=today_end
         ).exists(),
+        'top_attempts': rankings[:10],  # Top 10 users
+        'user_score': user_score,
+        'time_taken': user_time // 60 if user_time else None,  # Convert seconds to minutes
+        'daily_rank': user_rank
     }
     
     return render(request, 'EnglishQuiz.html', context)
@@ -87,26 +131,45 @@ def submit_answer(request, question_id):
             'message': 'You have already answered this question'
         })
     
-    # Get the selected answer from POST data
+    # Get the selected answer and completion time from POST data
     selected_answer = request.POST.get('answer')
+    completion_time = request.POST.get('completion_time', 0)
+    
     if not selected_answer or selected_answer not in ['A', 'B', 'C', 'D']:
         return JsonResponse({
             'status': 'error',
             'message': 'Invalid answer'
         })
     
+    try:
+        completion_time = int(completion_time)
+    except (ValueError, TypeError):
+        completion_time = 0
+    
     # Create and save the answer
     answer = UserAnswer(
         user=request.user,
         question=question,
-        selected_answer=selected_answer
+        selected_answer=selected_answer,
+        completion_time=completion_time
     )
     answer.save()
+    
+    # Check if this was the last question for today
+    today = timezone.now().date()
+    today_questions = EnglishQuestion.objects.filter(created_date=today).count()
+    user_answers_today = UserAnswer.objects.filter(
+        user=request.user,
+        answer_time__date=today
+    ).count()
+    
+    is_last_question = user_answers_today >= today_questions
     
     return JsonResponse({
         'status': 'success',
         'is_correct': answer.is_correct,
-        'correct_answer': question.correct_answer
+        'correct_answer': question.correct_answer,
+        'is_last_question': is_last_question
     })
 
 @login_required

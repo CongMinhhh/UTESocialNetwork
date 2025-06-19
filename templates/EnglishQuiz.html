@@ -171,13 +171,27 @@
                     <div class="card">
                         <h3>Daily Ranking</h3>
                         <div class="leaderboard-list">
-                            {% for attempt in top_attempts %}
-                            <div class="leaderboard-item">
-                                <span class="rank">{{ forloop.counter }}</span>
-                                <span class="username">{{ attempt.user.username }}</span>
-                                <span class="score">{{ attempt.score }}/20</span>
-                            </div>
-                            {% endfor %}
+                            {% if top_attempts %}
+                                {% for rank in top_attempts %}
+                                <div class="leaderboard-item {% if rank.username == user_profile.user.username %}current-user{% endif %}">
+                                    <div class="rank-info">
+                                        <span class="rank">{{ forloop.counter }}</span>
+                                        <div class="user-info">
+                                            <img src="{{ rank.profile.profileimg.url }}" alt="{{ rank.username }}" class="rank-avatar">
+                                            <span class="username">{{ rank.username }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="score-info">
+                                        <span class="score">{{ rank.score }}/{{ total_questions }}</span>
+                                        <span class="time">{{ rank.completion_time|floatformat:"0" }}s</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="no-attempts">
+                                    <p>No attempts yet today</p>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -217,6 +231,7 @@
     let isRollbackMode = false;
     let rollbackIndex = 0;
     let timeRemaining = 10 * 60; // 10 minutes in seconds
+    let quizCompleted = false;
 
     function startQuiz() {
         document.getElementById('quizOverview').style.display = 'none';
@@ -231,6 +246,11 @@
         if (!timerElement) return;
         
         timerInterval = setInterval(() => {
+            if (quizCompleted) {
+                clearInterval(timerInterval);
+                return;
+            }
+            
             timeRemaining--;
             const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
@@ -250,15 +270,20 @@
     }
 
     function loadQuestion(index) {
-        if (index >= questions.length) return;
+        if (index >= questions.length) {
+            finishQuiz();
+            return;
+        }
         
         const question = questions[index];
         document.getElementById('currentQuestionNumber').textContent = index + 1;
         document.getElementById('questionText').textContent = question.question_text;
         
-        // Clear previous options
+        // Clear previous options and feedback
         const optionsContainer = document.getElementById('options');
         optionsContainer.innerHTML = '';
+        const feedback = document.getElementById('feedback');
+        feedback.style.display = 'none';
         
         // Create new option elements
         const options = [
@@ -291,6 +316,17 @@
         // Reset selected answer
         selectedAnswer = null;
         document.getElementById('submitBtn').disabled = true;
+        
+        // Update button visibility
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.style.display = 'block';
+        document.getElementById('nextBtn').style.display = 'none';
+        
+        // Show finish button instead of next button for last question
+        if (index === questions.length - 1) {
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('finishBtn').style.display = 'block';
+        }
     }
 
     function selectAnswer(answer) {
@@ -304,6 +340,7 @@
         const question = questions[currentQuestionIndex];
         const formData = new FormData();
         formData.append('answer', selectedAnswer);
+        formData.append('completion_time', Math.round((new Date() - startTime) / 1000));
 
         fetch(`/quiz/submit/${question.id}/`, {
             method: 'POST',
@@ -329,11 +366,14 @@
                     ? '<i class="fa fa-check"></i> Correct!' 
                     : `<i class="fa fa-times"></i> Incorrect. The correct answer was ${data.correct_answer}`;
 
-                // Automatically move to next question after 1 second
-                setTimeout(() => {
-                    currentQuestionIndex++;
-                    loadQuestion(currentQuestionIndex);
-                }, 1000);
+                // Hide submit button and show next/finish button
+                document.getElementById('submitBtn').style.display = 'none';
+                
+                if (currentQuestionIndex === questions.length - 1) {
+                    document.getElementById('finishBtn').style.display = 'block';
+                } else {
+                    document.getElementById('nextBtn').style.display = 'block';
+                }
             } else {
                 alert(data.message);
             }
@@ -345,28 +385,38 @@
     }
 
     function nextQuestion() {
-        currentQuestionIndex++;
-        loadQuestion(currentQuestionIndex);
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion(currentQuestionIndex);
+        }
     }
 
     function skipQuestion() {
         const currentQuestion = questions[currentQuestionIndex];
-        
         skippedQuestions.push(currentQuestion);
         
-        currentQuestionIndex++;
-        
-        loadQuestion(currentQuestionIndex);
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion(currentQuestionIndex);
+        } else {
+            finishQuiz();
+        }
     }
 
     function finishQuiz() {
+        quizCompleted = true;
         clearInterval(timerInterval);
+        
+        // Hide question card and show results
         document.getElementById('questionCard').style.display = 'none';
         document.getElementById('quizResults').style.display = 'block';
         
-        // Calculate final score
+        // Calculate final score and time
         const endTime = new Date();
         const timeTaken = (endTime - startTime) / 1000 / 60; // in minutes
+        const timeInSeconds = Math.round((endTime - startTime) / 1000);
+        
+        // Update display
         document.getElementById('timeTaken').textContent = formatTime(timeTaken);
         
         // Calculate correct answers
@@ -378,7 +428,11 @@
         document.getElementById('finalScore').textContent = correctAnswers;
         document.getElementById('correctAnswers').textContent = correctAnswers;
         document.getElementById('skippedQuestions').textContent = skippedQuestions.length;
-        document.getElementById('rank').textContent = '-';
+        
+        // Reload page after 2 seconds to show updated rankings
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
     }
 
     function formatTime(minutes) {

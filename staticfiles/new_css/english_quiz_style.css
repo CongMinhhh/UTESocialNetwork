@@ -97,34 +97,123 @@ body {
 }
 
 .leaderboard-list {
-    margin-top: 1rem;
+    margin-top: 15px;
 }
 
 .leaderboard-item {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: 0.8rem;
-    border-bottom: 1px solid #eee;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
-.leaderboard-item:last-child {
-    border-bottom: none;
+.leaderboard-item:hover {
+    transform: translateY(-2px);
+    background-color: #e9ecef;
+}
+
+.leaderboard-item.current-user {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+}
+
+.rank-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .rank {
-    width: 30px;
-    font-weight: bold;
-    color: #2c3e50;
+    font-size: 18px;
+    font-weight: 600;
+    color: #4a90e2;
+    min-width: 24px;
+    text-align: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rank-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .username {
-    flex: 1;
-    margin: 0 1rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.score-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 .score {
-    font-weight: bold;
-    color: #27ae60;
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.time {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.no-attempts {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+}
+
+/* Top 3 Rankings Special Styles */
+.leaderboard-item:nth-child(1) .rank {
+    color: #ffd700;
+}
+
+.leaderboard-item:nth-child(2) .rank {
+    color: #c0c0c0;
+}
+
+.leaderboard-item:nth-child(3) .rank {
+    color: #cd7f32;
+}
+
+@media (max-width: 768px) {
+    .leaderboard-item {
+        padding: 10px;
+    }
+
+    .rank {
+        font-size: 16px;
+        min-width: 20px;
+    }
+
+    .rank-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .username {
+        font-size: 0.9em;
+    }
+
+    .score-info {
+        gap: 10px;
+        font-size: 0.9em;
+    }
 }
 
 /* Quiz Message */

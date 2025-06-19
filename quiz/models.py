@@ -38,6 +38,7 @@ class UserAnswer(models.Model):
     )
     is_correct = models.BooleanField(default=False, help_text="Whether the answer is correct")
     answer_time = models.DateTimeField(auto_now_add=True, help_text="When the answer was submitted")
+    completion_time = models.IntegerField(default=0, help_text="Time taken to complete in seconds")
 
     class Meta:
         ordering = ['-answer_time']
